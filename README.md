@@ -11,6 +11,32 @@ A modern web application to track expenses, visualize spending habits, and achie
 - Scan receipts
 - Smart suggestions based on habits
 
+## Usage
+
+### 1. Clone the repository
+
+``` sh
+git clone https://github.com/Buesse7310/Dollar-Doodle.git
+cd Dollar-Doodle
+```
+
+### 2. Install dependencies
+
+``` sh
+cd src/server
+npm install --omit=dev
+```
+
+### 3. Run server
+
+``` sh
+node server.js
+```
+
+### 4. Open the app
+
+Visit <http://localhost:5000> in your browser.
+
 ## Modules
 
 - Frontend
@@ -40,6 +66,32 @@ A modern web application to track expenses, visualize spending habits, and achie
 | Eva Buesse        | <eb116770@my.stchas.edu>  | Developer |
 | Nick Schott       | <ns285558@my.stchas.edu>  | Developer |
 | Daniel Austin     | <da281540@my.stchas.edu>  | Developer |
+
+## Development
+
+### 1. Clone the repository
+
+``` sh
+git clone https://github.com/Buesse7310/Dollar-Doodle.git
+cd Dollar-Doodle
+```
+
+### 2. Install dependencies
+
+``` sh
+cd src/server
+npm install
+```
+
+### 3. Run server (nodemon will reload when changes are made)
+
+``` sh
+npx nodemon server.js
+```
+
+### 4. Open the app
+
+The server is now running on <http://localhost:5000>.
 
 ---
 
