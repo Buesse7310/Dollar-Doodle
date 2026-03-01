@@ -83,15 +83,15 @@ cd src/server
 npm install
 ```
 
-### 3. Run server (nodemon will reload when changes are made)
+### 3. Run server
 
 ``` sh
 npx nodemon server.js
 ```
 
-### 4. Open the app
+### 4. Make changes
 
-The server is now running on <http://localhost:5000>.
+The server is now running on <http://localhost:5000> and nodemon will automatically reload the server when you edit a file.
 
 ---
 
