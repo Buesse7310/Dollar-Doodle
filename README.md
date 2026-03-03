@@ -13,6 +13,17 @@ A modern web application to track expenses, visualize spending habits, and achie
 
 ## Usage
 
+### 0. Install system dependencies
+
+[Git](https://git-scm.com) and [Node.js](https://nodejs.org) are required to run this project, meaning the following commands should run in your terminal without error:
+
+``` sh
+git -v
+npm -v
+```
+
+If there is an error when running either of the commands, then you need to install the related dependency.
+
 ### 1. Clone the repository
 
 ``` sh
@@ -20,7 +31,7 @@ git clone https://github.com/Buesse7310/Dollar-Doodle.git
 cd Dollar-Doodle
 ```
 
-### 2. Install dependencies
+### 2. Install project dependencies
 
 ``` sh
 cd src/server
@@ -69,6 +80,17 @@ Visit <http://localhost:5000> in your browser.
 
 ## Development
 
+### 0. Install system dependencies
+
+[Git](https://git-scm.com) and [Node.js](https://nodejs.org) are required to run this project, meaning the following commands should run in your terminal without error:
+
+``` sh
+git -v
+npm -v
+```
+
+If there is an error when running either of the commands, then you need to install the related dependency.
+
 ### 1. Clone the repository
 
 ``` sh
@@ -76,7 +98,7 @@ git clone https://github.com/Buesse7310/Dollar-Doodle.git
 cd Dollar-Doodle
 ```
 
-### 2. Install dependencies
+### 2. Install project dependencies
 
 ``` sh
 cd src/server
