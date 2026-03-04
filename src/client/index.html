@@ -1,29 +1,24 @@
-<form id="expenseForm">
-  <input type="number" id="amount" placeholder="Amount" required />
-  <select id="category">
-    <option>Food</option>
-    <option>Gas</option>
-    <option>Bills</option>
-  </select>
-  <button type="submit">Add Expense</button>
-</form>
+<!DOCTYPE html>
+<html>
 
-<script>
-document.getElementById("expenseForm").addEventListener("submit", async (e) => {
-  e.preventDefault();
+<head>
+  <meta charset="UTF-8" />
+  <title>Dollar Doodle</title>
+  <link rel="stylesheet" href="css/home.css" />
+</head>
 
-  const expense = {
-    amount: document.getElementById("amount").value,
-    category: document.getElementById("category").value
-  };
+<body>
 
-  const response = await fetch("http://localhost:5000/expenses", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(expense)
-  });
+  <div class="auth-container">
+    <h1>Dollar Doodle</h1>
+    <p>Climb Higher, Spend Smarter</p>
 
-  const data = await response.json();
-  alert("Expense added!");
-});
-</script>
+    <div class="home-buttons">
+      <button onclick="window.location.href='login.html'">Login</button>
+      <button onclick="window.location.href='register.html'">Register</button>
+    </div>
+  </div>
+
+</body>
+
+</html>

@@ -1,18 +1,40 @@
 const express = require("express");
 const path = require("path");
 
+const authRoutes = require("./routes/auth");
+const auth = require("./middleware/auth");
+
+const expensesRouter = require("./routes/expenses");
+
 const app = express();
 
 app.use(express.json());
 
-// serve client html
+// serve frontend files
 app.use(express.static(path.join(__dirname, "../client")));
 
-app.post("/expenses", (req, res) => {
-  console.log("Expense received:", req.body);
-  res.json({ message: "Expense saved" });
+// auth api
+app.use("/api/auth", authRoutes);
+
+// test api
+app.get("/api/test", (req, res) => {
+  res.json({ message: "Server is working" });
 });
 
-app.listen(5000, () => {
-  console.log("Server running on port 5000");
+// dashboard api
+app.get("/api/dashboard", auth, (req, res) => {
+  res.json({
+    message: "Welcome to your dashboard",
+    user: req.user
+  });
+});
+
+// expenses api
+app.use("/api/expenses", expensesRouter);
+
+// start server on specified port
+const PORT = 5000;
+
+app.listen(PORT, () => {
+  console.log(`Server running at http://localhost:${PORT}`);
 });
