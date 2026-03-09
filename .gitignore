@@ -1,1 +1,6 @@
+# npm packages
 node_modules/
+
+# MS Office temp files
+*.tmp
+~$*
