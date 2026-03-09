@@ -2,6 +2,16 @@
 CREATE DATABASE IF NOT EXISTS Dollar_Doodle;
 USE Dollar_Doodle;
 
+-- Drop existing tables in correct order (children before parents)
+DROP TABLE IF EXISTS Receipts;
+DROP TABLE IF EXISTS Users_Feedbackss;
+DROP TABLE IF EXISTS Budgets_Suggestions;
+DROP TABLE IF EXISTS Monthly_Budgets;
+DROP TABLE IF EXISTS Incomes;
+DROP TABLE IF EXISTS Expenses;
+DROP TABLE IF EXISTS Categories;
+DROP TABLE IF EXISTS Users;
+
 -- Table: Users
 CREATE TABLE Users (
     User_ID INT AUTO_INCREMENT PRIMARY KEY,
@@ -56,8 +66,8 @@ CREATE TABLE Expenses (
     FOREIGN KEY (User_ID) REFERENCES Users(User_ID) ON DELETE CASCADE,
 
     -- Prevent deletion of categories that have existing expenses linked to them
-    --So the financial history doesn't get messed up 
-    --by deleting categories that still have expenses linked to them.
+    -- So the financial history doesn't get messed up 
+    -- by deleting categories that still have expenses linked to them.
     FOREIGN KEY (Category_ID) REFERENCES Categories(Category_ID) ON DELETE RESTRICT,
     
     -- Speed up finding all expenses for a specific user
@@ -129,10 +139,8 @@ CREATE TABLE Monthly_Budgets (
     
     -- Ensure budget limits are not negative and spent amounts never go below zero
     CONSTRAINT chk_budget_amount_positive CHECK (Budget_Amount >= 0),
-    CONSTRAINT chk_budget_spent_non_negative CHECK (Budget_Spent >= 0),
+    CONSTRAINT chk_budget_spent_non_negative CHECK (Budget_Spent >= 0)
     
-    -- Ensure one budget per user per category per month
-    UNIQUE KEY unique_user_category_month (User_ID, Category_ID, YEAR(Budget_Date), MONTH(Budget_Date))
 );
 
 -- Table: Budgets_Suggestions
@@ -183,10 +191,10 @@ CREATE TABLE Receipts (
     Receipt_Image_Url VARCHAR(500) NOT NULL,
     Rcpt_Uploaded_At TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     
-    ---- Automatically delete receipt records when the associated user account is deleted
+    -- Automatically delete receipt records when the associated user account is deleted
     FOREIGN KEY (User_ID) REFERENCES Users(User_ID) ON DELETE CASCADE,
     
-    ---- Speed up finding receipts by user or when they were uploaded
+    -- Speed up finding receipts by user or when they were uploaded
     INDEX idx_receipt_user (User_ID),
     INDEX idx_receipt_uploaded (Rcpt_Uploaded_At)
 );
