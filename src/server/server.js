@@ -1,6 +1,8 @@
 const express = require("express");
 const path = require("path");
 
+require("dotenv").config({ path: path.resolve(__dirname, "../../.env") }); // load .env from project root
+
 const authRoutes = require("./routes/auth");
 const auth = require("./middleware/auth");
 
@@ -33,7 +35,7 @@ app.get("/api/dashboard", auth, (req, res) => {
 app.use("/api/expenses", expensesRouter);
 
 // start server on specified port
-const PORT = 5000;
+const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {
   console.log(`Server running at http://localhost:${PORT}`);

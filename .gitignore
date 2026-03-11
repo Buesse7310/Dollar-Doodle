@@ -1,6 +1,9 @@
 # npm packages
 node_modules/
 
+# environment variables
+.env
+
 # MS Office temp files
 *.tmp
 ~$*

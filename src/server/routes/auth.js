@@ -6,7 +6,7 @@ const router = express.Router();
 
 // in-memory users (temporary, DB later)
 let users = [];
-const SECRET = "supersecretkey";
+const SECRET = process.env.JWT_SECRET || "testkey";
 
 // --- register user ---
 router.post("/register", async (req, res) => {
