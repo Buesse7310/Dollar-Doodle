@@ -12,10 +12,12 @@
     <div class="auth-container">
         <h2>Register</h2>
 
-        <input type="email" id="email" placeholder="Email" required />
-        <input type="password" id="password" placeholder="Password" required />
 
-        <button onclick="register()">Register</button>
+        <form id="register-form">
+            <input type="email" id="email" placeholder="Email" required />
+            <input type="password" id="password" placeholder="Password" required />
+            <button type="submit">Register</button>
+        </form>
 
         <p id="error" class="error"></p>
 
