@@ -3,7 +3,7 @@ const router = express.Router();
 const auth = require("../middleware/auth");
 
 // in-memory storage (temporary, DB later)
-const expenses = [];
+let expenses = [];
 
 // GET current expenses
 router.get("/", auth, (req, res) => {
@@ -33,6 +33,21 @@ router.post("/", auth, (req, res) => {
   console.log(`Expense added for ${req.user.email}:`, expense);
 
   res.json(expense);
+});
+
+// DELETE all expenses for logged-in user
+router.delete("/", auth, (req, res) => {
+  // Count how many expenses belong to this user
+  const clearedCount = expenses.filter(e => e.userId === req.user.id).length;
+
+  // Remove those expenses
+  expenses = expenses.filter(e => e.userId !== req.user.id);
+
+  // Log with count in parentheses
+  console.log(`All expenses cleared (${clearedCount}) for ${req.user.email}`);
+
+  // Simple JSON response
+  res.json({ message: "All expenses cleared" });
 });
 
 module.exports = router;

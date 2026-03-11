@@ -102,9 +102,31 @@ async function addExpense() {
 }
 
 // Clear all expenses
-function clearExpenses() {
-    expenses = [];
-    renderExpenses();
+async function clearExpenses() {
+    if (!confirm("Are you sure you want to clear all expenses?")) return;
+
+    try {
+        const res = await fetch("/api/expenses", {
+            method: "DELETE",
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+            alert(data.error || "Failed to clear expenses");
+            return;
+        }
+
+        expenses = [];
+        renderExpenses();
+        alert("All expenses cleared!");
+    } catch (err) {
+        console.error("Error clearing expenses:", err);
+        alert("Server error. Try again.");
+    }
 }
 
 // Logout
