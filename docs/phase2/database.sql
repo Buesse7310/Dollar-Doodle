@@ -35,14 +35,9 @@ CREATE TABLE Users (
 CREATE TABLE Categories (
     Category_ID INT AUTO_INCREMENT PRIMARY KEY,
     Category_Name ENUM(
-        'Food & Dining', 'Transportation', 'Shopping', 'Entertainment',
-        'Bills & Utilities', 'Rent / Mortgage', 'Healthcare', 'Education',
-        'Travel', 'Personal Care', 'Groceries', 'Fast Food',
-        'Alcohol & Bars', 'Gas & Fuel', 'Parking', 'Clothing',
-        'Electronics', 'Gifts & Donations', 'Subscriptions',
-        'Phone & Internet', 'Insurance', 'Childcare', 'Pets',
-        'Fitness', 'Home Improvement', 'Office Supplies', 'Other'
-    ) NOT NULL,
+        'Food & Dining','Transportation', 'Shopping','Entertainment','Bills & Utilities','Housing','Healthcare','Education','Travel',
+        'Personal Care','Pets','Other'
+    )NOT NULL,
     Category_Icon VARCHAR(50),
     Budget_Percentage DECIMAL(5,2),
     
