@@ -1,104 +1,158 @@
+// Get JWT token from localStorage
 const token = localStorage.getItem("token");
 
-// Redirect to login if not logged in
+// Redirect to login if token missing
 if (!token) {
     window.location.href = "login.html";
 }
 
-const transactionsEl = document.getElementById("transactions");
-const balanceEl = document.getElementById("balance");
-const welcomeEl = document.getElementById("welcome");
-const clearBtn = document.getElementById("clearBtn");
+// DOM elements
+const expensesList = document.getElementById("transactions");
+const balanceDisplay = document.getElementById("balance");
+const welcomeMessage = document.getElementById("welcome");
+const clearExpensesButton = document.getElementById("clearBtn");
+const categoryDropdown = document.getElementById("category");
 
-let expenses = [];
+// State
+let userExpenses = [];
 
-// Load user info & expenses
+// Helper: fetch with token automatically
+async function authFetch(url, options = {}) {
+    options.headers = {
+        ...options.headers,
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+    };
+    const res = await fetch(url, options);
+    if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || "API error");
+    }
+    return res.json();
+}
+
+// Load user info, categories, and expenses
 async function loadDashboard() {
     try {
-        const res = await fetch("/api/dashboard", {
-            headers: {
-                Authorization: `Bearer ${token}`
-            }
-        });
+        const data = await authFetch("/api/dashboard");
+        welcomeMessage.textContent = `Welcome, ${data.user.firstName || data.user.email}!`;
 
-        const data = await res.json();
-
-        if (!res.ok) {
-            console.error("Dashboard fetch error:", data);
-            alert(data.error || "Session expired. Please login again.");
-            logout();
-            return;
-        }
-
-        welcomeEl.textContent = `Welcome, ${data.user.email}!`;
-
-        // Fetch expenses
+        await loadCategories();
         await loadExpenses();
-
     } catch (err) {
-        console.error("Unexpected dashboard error:", err);
-        alert("Unexpected server error. Check console for details.");
+        console.error("Dashboard load error:", err);
+        alert(err.message);
+        logout();
+    }
+}
+
+// Load categories from DB
+async function loadCategories() {
+    try {
+        const categories = await authFetch("/api/categories");
+
+        categoryDropdown.innerHTML = '<option value="">Select category</option>';
+        categories.forEach(c => {
+            const option = document.createElement("option");
+            option.value = c.Category_ID;
+            option.textContent = c.Category_Name;
+            categoryDropdown.appendChild(option);
+        });
+    } catch (err) {
+        console.error("Load categories error:", err);
+        alert(err.message);
     }
 }
 
 // Load expenses
 async function loadExpenses() {
-    const res = await fetch("/api/expenses", {
-        headers: {
-            Authorization: `Bearer ${token}`
-        }
-    });
-
-    expenses = await res.json();
-    renderExpenses();
+    try {
+        userExpenses = await authFetch("/api/expenses");
+        renderExpenses();
+    } catch (err) {
+        console.error("Load expenses error:", err);
+        alert(err.message);
+    }
 }
 
-// Render expense list
+// Render expenses list
 function renderExpenses() {
-    transactionsEl.innerHTML = "";
+    expensesList.innerHTML = "";
 
     let total = 0;
 
-    expenses.forEach(e => {
+    userExpenses.forEach(e => {
         const li = document.createElement("li");
-        li.textContent = `${e.description} - $${e.amount} [${e.category}]`;
-        transactionsEl.appendChild(li);
+        li.textContent = `${e.Expense_Description || ""} - $${parseFloat(e.Expense_Amount).toFixed(2)} [${e.Category_Name}]`;
 
-        total += e.amount;
+        const delBtn = document.createElement("button");
+        delBtn.textContent = "Delete";
+        delBtn.onclick = () => deleteExpense(e.Expense_ID);
+
+        li.appendChild(delBtn);
+        expensesList.appendChild(li);
+
+        total += parseFloat(e.Expense_Amount);
     });
 
-    balanceEl.textContent = `Balance: $${total}`;
-
-    clearBtn.style.display = expenses.length ? "block" : "none";
+    balanceDisplay.textContent = `Balance: $${total.toFixed(2)}`;
+    clearExpensesButton.style.display = userExpenses.length ? "block" : "none";
 }
 
-// Add expense
-async function addExpense() {
-    const description = document.getElementById("description").value;
-    const amount = parseFloat(document.getElementById("amount").value);
-    const category = document.getElementById("category").value;
+// Add new expense
+async function addExpense(e) {
+    e?.preventDefault();
 
-    if (!description || !amount) {
-        alert("Enter description and amount");
+    const description = document.getElementById("description").value.trim();
+    const amount = parseFloat(document.getElementById("amount").value);
+    const categoryId = parseInt(categoryDropdown.value);
+
+    if (!amount || !categoryId) {
+        alert("Enter valid amount and select category");
         return;
     }
 
-    const res = await fetch("/api/expenses", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`
-        },
-        body: JSON.stringify({ description, amount, category })
-    });
+    try {
+        const data = await authFetch("/api/expenses", {
+            method: "POST",
+            body: JSON.stringify({
+                amount,
+                categoryId,
+                description,
+                date: new Date().toISOString().slice(0, 10)
+            })
+        });
 
-    const data = await res.json();
-    expenses.push(data);
-    renderExpenses();
+        userExpenses.push({
+            Expense_ID: data.expenseId,
+            Expense_Amount: amount,
+            Expense_Description: description,
+            Category_Name: categoryDropdown.selectedOptions[0].text
+        });
 
-    // Clear inputs
-    document.getElementById("description").value = "";
-    document.getElementById("amount").value = "";
+        renderExpenses();
+
+        document.getElementById("description").value = "";
+        document.getElementById("amount").value = "";
+        categoryDropdown.value = "";
+    } catch (err) {
+        console.error("Add expense error:", err);
+        alert(err.message);
+    }
+}
+
+// Delete expense
+async function deleteExpense(id) {
+    if (!confirm("Delete this expense?")) return;
+
+    try {
+        await authFetch(`/api/expenses/${id}`, { method: "DELETE" });
+        userExpenses = userExpenses.filter(e => e.Expense_ID !== id);
+        renderExpenses();
+    } catch (err) {
+        console.error("Delete expense error:", err);
+        alert(err.message);
+    }
 }
 
 // Clear all expenses
@@ -106,26 +160,13 @@ async function clearExpenses() {
     if (!confirm("Are you sure you want to clear all expenses?")) return;
 
     try {
-        const res = await fetch("/api/expenses", {
-            method: "DELETE",
-            headers: {
-                Authorization: `Bearer ${token}`
-            }
-        });
-
-        const data = await res.json();
-
-        if (!res.ok) {
-            alert(data.error || "Failed to clear expenses");
-            return;
-        }
-
-        expenses = [];
+        await authFetch("/api/expenses", { method: "DELETE" });
+        userExpenses = [];
         renderExpenses();
         alert("All expenses cleared!");
     } catch (err) {
-        console.error("Error clearing expenses:", err);
-        alert("Server error. Try again.");
+        console.error("Clear expenses error:", err);
+        alert(err.message);
     }
 }
 
@@ -135,4 +176,12 @@ function logout() {
     window.location.href = "login.html";
 }
 
+// Attach event listeners
+document.addEventListener("DOMContentLoaded", () => {
+    document.getElementById("logoutBtn").addEventListener("click", logout);
+    document.getElementById("add-expense-form").addEventListener("submit", addExpense);
+    clearExpensesButton.addEventListener("click", clearExpenses);
+});
+
+// Initial load
 loadDashboard();

@@ -40,13 +40,15 @@ async function login() {
 
 // register function
 async function register() {
+  const firstName = document.getElementById("firstName").value.trim();
+  const lastName = document.getElementById("lastName").value.trim();
   const email = document.getElementById("email").value.trim();
   const password = document.getElementById("password").value.trim();
   const errorEl = document.getElementById("error");
   errorEl.textContent = "";
 
-  if (!email || !password) {
-    errorEl.textContent = "Email and password required";
+  if (!firstName || !lastName || !email || !password) {
+    errorEl.textContent = "All fields are required";
     return;
   }
 
@@ -57,7 +59,7 @@ async function register() {
     const res = await fetch("/api/auth/register", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password })
+      body: JSON.stringify({ firstName, lastName, email, password })
     });
 
     const data = await res.json();

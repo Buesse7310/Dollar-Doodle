@@ -1,38 +1,21 @@
 const express = require("express");
-const path = require("path");
-
-require("dotenv").config({ path: path.resolve(__dirname, "../../.env") }); // load .env from project root
-
-const authRoutes = require("./routes/auth");
-const auth = require("./middleware/auth");
-
-const expensesRouter = require("./routes/expenses");
-
 const app = express();
 
 app.use(express.json());
 
+const path = require("path");
+
+// load .env from project root
+require("dotenv").config({ path: path.resolve(__dirname, "../../.env") });
+
 // serve frontend files
 app.use(express.static(path.join(__dirname, "../client")));
 
-// auth api
-app.use("/api/auth", authRoutes);
-
-// test api
-app.get("/api/test", (req, res) => {
-  res.json({ message: "Server is working" });
-});
-
-// dashboard api
-app.get("/api/dashboard", auth, (req, res) => {
-  res.json({
-    message: "Welcome to your dashboard",
-    user: req.user
-  });
-});
-
-// expenses api
-app.use("/api/expenses", expensesRouter);
+// routes
+app.use("/api/auth", require("./routes/auth"));
+app.use("/api/dashboard", require("./routes/dashboard"));
+app.use("/api/expenses", require("./routes/expenses"));
+app.use("/api/categories", require("./routes/categories"));
 
 // start server on specified port
 const PORT = process.env.PORT || 5000;
