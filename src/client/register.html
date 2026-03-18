@@ -1,35 +1,51 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
-    <meta charset="UTF-8" />
-    <title>Register</title>
-    <link rel="stylesheet" href="css/auth.css" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dollar Doodle - Register</title>
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="css/auth.css">
 </head>
 
 <body>
+  <div class="page-container">
 
-    <div class="auth-container">
-        <h2>Register</h2>
-
-
-        <form id="register-form">
-            <input type="text" id="firstName" placeholder="First Name" required />
-            <input type="text" id="lastName" placeholder="Last Name" required />
-            <input type="email" id="email" placeholder="Email" required />
-            <input type="password" id="password" placeholder="Password" required />
-            <button type="submit">Register</button>
-        </form>
-
-        <p id="error" class="error"></p>
-
-        <p>
-            Already have an account?
-            <a href="login.html">Login</a>
-        </p>
+    <!-- Logo -->
+    <div class="logo-wrapper">
+      <a href="index.html">
+        <img src="assets/images/logo-full.png" class="logo" alt="Dollar Doodle Logo">
+      </a>
     </div>
 
-    <script src="js/auth.js"></script>
+    <!-- Register Card -->
+    <div class="auth-container">
+      <h2>Register</h2>
+
+      <!-- Registration Form -->
+      <form id="register-form">
+        <input type="text" id="firstName" placeholder="First Name" required />
+        <input type="text" id="lastName" placeholder="Last Name" required />
+        <input type="email" id="email" placeholder="Email" required />
+        <input type="password" id="password" placeholder="Password" required />
+        <button type="submit">Register</button>
+      </form>
+
+      <!-- Error message -->
+      <p class="error" id="error"></p>
+
+      <p>
+        Already have an account?
+        <a href="login.html">Login</a>
+      </p>
+    </div>
+
+  </div>
+
+  <!-- JS -->
+  <script src="js/auth.js"></script>
 </body>
 
 </html>

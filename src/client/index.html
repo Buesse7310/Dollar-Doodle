@@ -1,22 +1,38 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Dollar Doodle</title>
-  <link rel="stylesheet" href="css/home.css" />
+  <link rel="stylesheet" href="css/home.css">
 </head>
 
 <body>
 
-  <div class="auth-container">
-    <h1>Dollar Doodle</h1>
-    <p>Climb Higher, Spend Smarter</p>
+  <div class="landing-page">
 
-    <div class="home-buttons">
-      <button onclick="window.location.href='login.html'">Login</button>
-      <button onclick="window.location.href='register.html'">Register</button>
+    <!-- Logo -->
+    <div class="logo-wrapper">
+      <a href="index.html">
+        <img src="assets/images/logo-full.png" class="logo" alt="Dollar Doodle Logo">
+      </a>
     </div>
+
+    <!-- Tagline -->
+    <h1 class="tagline">Track Your Money, Simplify Your Life</h1>
+
+    <!-- Action Buttons -->
+    <div class="buttons">
+      <button class="btn login-btn" onclick="window.location.href='login.html'">Login</button>
+      <button class="btn register-btn" onclick="window.location.href='register.html'">Register</button>
+    </div>
+
+    <!-- Footer / Optional info -->
+    <footer class="landing-footer">
+      &copy; 2026 Dollar Doodle. All rights reserved.
+    </footer>
+
   </div>
 
 </body>

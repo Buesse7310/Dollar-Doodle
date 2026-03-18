@@ -1,31 +1,57 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
-  <meta charset="UTF-8" />
-  <title>Login</title>
-  <link rel="stylesheet" href="css/auth.css" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dollar Doodle - Login</title>
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="css/auth.css">
+
+  <!-- Google Sign-In API -->
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
 
 <body>
+  <div class="page-container">
 
-  <div class="auth-container">
-    <h2>Login</h2>
+    <!-- Logo -->
+    <div class="logo-wrapper">
+      <a href="index.html">
+        <img src="assets/images/logo-full.png" class="logo" alt="Dollar Doodle Logo">
+      </a>
+    </div>
 
-    <form id="login-form">
-      <input type="email" id="email" placeholder="Email" required />
-      <input type="password" id="password" placeholder="Password" required />
-      <button type="submit">Login</button>
-    </form>
+    <!-- Login Card -->
+    <div class="auth-container">
+      <h2>Login</h2>
 
-    <p id="error" class="error"></p>
+      <!-- Email/Password Login Form -->
+      <form id="login-form">
+        <input type="email" id="email" placeholder="Email" required />
+        <input type="password" id="password" placeholder="Password" required />
+        <button type="submit">Login</button>
+      </form>
 
-    <p>
-      Don't have an account?
-      <a href="register.html">Register</a>
-    </p>
+      <div class="divider">or</div>
+
+      <!-- Google Login -->
+      <div id="g_id_onload"></div>
+      <div class="g_id_signin"></div>
+
+      <!-- Error message -->
+      <p class="error" id="error"></p>
+
+      <p>
+        Don't have an account?
+        <a href="register.html">Register</a>
+      </p>
+    </div>
+
   </div>
 
+  <!-- JS -->
   <script src="js/auth.js"></script>
 </body>
 
