@@ -1,21 +1,34 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
   <meta charset="UTF-8">
-  <title>Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dollar Doodle - Dashboard</title>
   <link rel="stylesheet" href="css/dashboard.css">
 </head>
 
 <body>
 
-  <div class="dashboard-container">
-    <h1>Dashboard</h1>
-    <button id="logoutBtn">Logout</button>
+  <!-- Header with Logo -->
+  <header class="dashboard-header">
+    <div class="logo-wrapper">
+      <a href="index.html">
+        <img src="assets/images/logo-full.png" class="logo" alt="Dollar Doodle Logo">
+      </a>
+    </div>
+  </header>
 
-    <div id="welcome"></div>
+  <!-- Dashboard Container -->
+  <div class="dashboard-container">
+    <div class="top-bar">
+      <div id="welcome"></div>
+      <button id="logoutBtn">Logout</button>
+    </div>
+
     <div id="balance">Balance: $0</div>
 
+    <!-- Add Expense Form -->
     <h3>Add Expense</h3>
     <form id="add-expense-form">
       <input type="text" id="description" placeholder="Description" />
@@ -26,9 +39,13 @@
       <button type="submit">Add</button>
     </form>
 
+    <!-- Expenses List -->
     <h3>Expenses</h3>
     <ul id="transactions"></ul>
+
+    <!-- Clear All Button -->
     <button id="clearBtn">Clear All</button>
+
     <p id="error" class="error"></p>
   </div>
 

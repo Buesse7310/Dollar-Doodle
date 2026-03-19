@@ -83,19 +83,57 @@ function renderExpenses() {
 
     userExpenses.forEach(e => {
         const li = document.createElement("li");
-        li.textContent = `${e.Expense_Description || ""} - $${parseFloat(e.Expense_Amount).toFixed(2)} [${e.Category_Name}]`;
+        li.classList.add("transaction-item");
 
+        // Description left
+        const descSpan = document.createElement("span");
+        descSpan.classList.add("transaction-desc");
+        descSpan.textContent = e.Expense_Description || "";
+
+        // Category below description
+        const categorySpan = document.createElement("span");
+        categorySpan.classList.add("transaction-category");
+        categorySpan.textContent = `[${e.Category_Name}]`;
+
+        const leftDiv = document.createElement("div");
+        leftDiv.appendChild(descSpan);
+        leftDiv.appendChild(categorySpan);
+
+        // Amount center
+        const amountSpan = document.createElement("span");
+        const amt = parseFloat(e.Expense_Amount).toFixed(2);
+        amountSpan.textContent = `-$${amt}`;
+        amountSpan.classList.add("expense-amount");
+
+        // Delete button right
         const delBtn = document.createElement("button");
         delBtn.textContent = "Delete";
+        delBtn.classList.add("delete-btn");
         delBtn.onclick = () => deleteExpense(e.Expense_ID);
 
+        li.appendChild(leftDiv);
+        li.appendChild(amountSpan);
         li.appendChild(delBtn);
+
         expensesList.appendChild(li);
 
-        total += parseFloat(e.Expense_Amount);
+        total -= parseFloat(e.Expense_Amount);
     });
 
-    balanceDisplay.textContent = `Balance: $${total.toFixed(2)}`;
+    let formattedBalance;
+    if (total < 0) {
+        formattedBalance = `-$${Math.abs(total).toFixed(2)}`;
+        balanceDisplay.style.color = "#ff4c4c"; // red
+    } else if (total > 0) {
+        formattedBalance = `$${total.toFixed(2)}`;
+        balanceDisplay.style.color = "#4caf50"; // green
+    } else {
+        formattedBalance = `$0.00`;
+        balanceDisplay.style.color = "#333"; // default
+    }
+
+    balanceDisplay.textContent = `Balance: ${formattedBalance}`;
+
     clearExpensesButton.style.display = userExpenses.length ? "block" : "none";
 }
 
