@@ -1,3 +1,4 @@
+
 -- Create Dollar Doodle Database
 CREATE DATABASE IF NOT EXISTS Dollar_Doodle;
 USE Dollar_Doodle;
