@@ -64,7 +64,7 @@ Visit <http://localhost:5000> in your browser.
 ## Timeline
 
 - [x] Phase 1 (Feb 22): Brainstorm + project proposal.
-- [ ] Phase 2 (Mar 22): Frontend development.
+- [x] Phase 2 (Mar 22): Frontend development.
 - [ ] Phase 3 (Apr 19): Backend development.
 - [ ] Phase 4 (May 11): Test and debug.
 
