@@ -91,64 +91,7 @@ router.post("/login", async (req, res) => {
   }
 });
 
-// --- Google login user ---
-router.post("/google-login", async (req, res) => {
-  const { token } = req.body;
-  if (!token) return res.status(400).json({ error: "Google token missing" });
-
-  try {
-    // Verify token with Google
-    const ticket = await client.verifyIdToken({
-      idToken: token,
-      audience: process.env.GOOGLE_CLIENT_ID,
-    });
-
-    const payload = ticket.getPayload();
-    const { sub, email, given_name, family_name } = payload;
-
-    // Check if user exists
-    const [rows] = await db.execute(
-      "SELECT User_ID FROM Users WHERE User_email = ?",
-      [email]
-    );
-
-    let userId;
-
-    if (rows.length === 0) {
-      // Create new user in DB
-      const [result] = await db.execute(
-        `INSERT INTO Users 
-          (User_email, User_FirstName, User_LastName, User_Auth_Type)
-         VALUES (?, ?, ?, 'google')`,
-        [email, given_name || "", family_name || ""]
-      );
-      userId = result.insertId;
-    } else {
-      userId = rows[0].User_ID;
-    }
-
-    // Update last login timestamp
-    await db.execute(
-      "UPDATE Users SET User_Last_login = CURRENT_TIMESTAMP WHERE User_ID = ?",
-      [userId]
-    );
-
-    // Issue JWT
-    const jwtToken = jwt.sign(
-      { id: userId, email },
-      SECRET,
-      { expiresIn: "1h" }
-    );
-
-    res.json({ token: jwtToken });
-
-  } catch (err) {
-    console.error("Google login error:", err);
-    res.status(401).json({ error: "Invalid Google token" });
-  }
-});
-
-// --- Google login user ---
+// --- Google login ---
 router.post("/google-login", async (req, res) => {
   const { token } = req.body;
   if (!token) return res.status(400).json({ error: "Google token missing" });
