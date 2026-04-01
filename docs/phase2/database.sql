@@ -194,3 +194,17 @@ CREATE TABLE Receipts (
     INDEX idx_receipt_user (User_ID),
     INDEX idx_receipt_uploaded (Rcpt_Uploaded_At)
 );
+
+INSERT INTO categories (Category_Name, Category_Icon, Budget_Percentage) VALUES
+('Food & Dining', '🍔', 0.00),
+('Transportation', '🚗', 0.00),
+('Shopping', '🛍️', 0.00),
+('Entertainment', '🎬', 0.00),
+('Bills & Utilities', '💡', 0.00),
+('Housing', '🏠', 0.00),
+('Healthcare', '🏥', 0.00),
+('Education', '📚', 0.00),
+('Travel', '✈️', 0.00),
+('Personal Care', '💇', 0.00),
+('Pets', '🐶', 0.00),
+('Other', '📦', 0.00);
