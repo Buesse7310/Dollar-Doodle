@@ -3,7 +3,7 @@ const token = localStorage.getItem("token");
 
 // Redirect to login if token missing
 if (!token) {
-    window.location.href = "login.html";
+    window.location.replace("login.html");
 }
 
 // DOM elements
@@ -211,7 +211,7 @@ async function clearExpenses() {
 // Logout
 function logout() {
     localStorage.removeItem("token");
-    window.location.href = "login.html";
+    window.location.replace("login.html");
 }
 
 // Attach event listeners
