@@ -14,8 +14,8 @@ app.use(express.static(path.join(__dirname, "../client")));
 // routes
 app.use("/api/auth", require("./routes/auth"));
 app.use("/api/dashboard", require("./routes/dashboard"));
-app.use("/api/expenses", require("./routes/expenses"));
-app.use("/api/categories", require("./routes/categories"));
+app.use("/api/transactions", require("./routes/transactions"));
+app.use("/api/db-lookup", require("./routes/db-lookup"));
 app.use("/api/config", require("./routes/config"));
 
 // start server on specified port

@@ -28,27 +28,70 @@
 
     <div id="balance">Balance: $0</div>
 
-    <!-- Add Expense Button -->
-    <button id="add-expense-btn">Add Expense</button>
+    <!-- Add Transaction Button -->
+    <button id="add-expense-btn">Add Transaction</button>
 
-    <!-- Add Expense Modal -->
+    <!-- Add Transaction Modal -->
     <div id="add-expense-modal" class="modal hidden">
       <div class="modal-content">
         <span class="close-btn">&times;</span>
-        <h3>Add Expense</h3>
+        <h3>Add Transaction</h3>
         <form id="add-expense-form">
-          <input type="text" id="description" placeholder="Description" />
-          <input type="number" id="amount" placeholder="Amount" step="0.01" />
-          <select id="category">
-            <!-- Categories will be loaded dynamically -->
-          </select>
+
+          <!-- Transaction Type -->
+          <div id="type-wrapper">
+            <select id="type" required>
+              <option value="expense" selected>Expense</option>
+              <option value="income">Income</option>
+            </select>
+          </div>
+
+          <!-- Description (expenses only) -->
+          <div id="description-wrapper">
+            <input type="text" id="description" placeholder="Description" />
+          </div>
+
+          <!-- Amount (common) -->
+          <div id="amount-wrapper">
+            <input type="number" id="amount" placeholder="Amount" step="0.01" required />
+          </div>
+
+          <!-- Date (common) -->
+          <div id="date-wrapper">
+            <input type="date" id="date" required />
+          </div>
+
+          <!-- Expense-specific: category -->
+          <div id="category-wrapper">
+            <select id="category">
+              <!-- Categories loaded dynamically -->
+            </select>
+          </div>
+
+          <!-- Income-specific: source -->
+          <div id="income-source-wrapper">
+            <select id="income-source">
+              <!-- Income sources loaded dynamically -->
+            </select>
+          </div>
+
+          <!-- Income-specific: recurring -->
+          <div id="income-repeating-wrapper">
+            <label>
+              <input type="checkbox" id="income-repeating" /> Recurring Income
+            </label>
+            <select id="income-frequency" disabled>
+              <!-- Recurring frequencies loaded dynamically -->
+            </select>
+          </div>
+
           <button type="submit">Add</button>
         </form>
       </div>
     </div>
 
-    <!-- Expenses List -->
-    <h3>Expenses</h3>
+    <!-- Transactions List -->
+    <h3>Transactions</h3>
     <ul id="transactions"></ul>
 
     <!-- Clear All Button -->
