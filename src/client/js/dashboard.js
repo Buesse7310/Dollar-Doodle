@@ -1,4 +1,40 @@
 // ------------------------
+// Auth check (JWT)
+// ------------------------
+const token = localStorage.getItem("token");
+
+if (!token) {
+    window.location.replace("/login.html");
+}
+
+// ------------------------
+// Auth Fetch Helper
+// ------------------------
+async function authFetch(url, options = {}) {
+    const token = localStorage.getItem("token");
+    if (!token) {
+        logout();
+        return;
+    }
+
+    options.headers = {
+        ...(options.headers || {}),
+        "Authorization": `Bearer ${token}`,
+        "Content-Type": "application/json"
+    };
+
+    const res = await fetch(url, options);
+
+    if (res.status === 401) {
+        // Token expired, redirect to login with expired flag
+        window.location.replace("/login.html?expired=1");
+        return null;
+    }
+
+    return res;
+}
+
+// ------------------------
 // Dashboard Elements
 // ------------------------
 const welcomeDisplay = document.getElementById("welcome");
@@ -25,21 +61,20 @@ const incomeRepeatingCheckbox = document.getElementById("income-repeating");
 const incomeFrequencyWrapper = document.getElementById("income-frequency-wrapper");
 const incomeFrequencySelect = document.getElementById("income-frequency");
 
+const logoutBtn = document.getElementById("logout-btn");
+
 let userTransactions = [];
 
 // ------------------------
-// Fetch dropdown data from server
+// Fetch dropdown data
 // ------------------------
 async function fetchDropdowns() {
     try {
-        const res = await fetch("/api/db-lookup", {
-            headers: { "Authorization": `Bearer ${localStorage.getItem("token")}` }
-        });
-        if (!res.ok) throw new Error("Failed to fetch dropdown data");
+        const res = await authFetch("/api/db-lookup");
+        if (!res) return;
 
         const data = await res.json();
 
-        // 1️⃣ Populate categories
         categorySelect.innerHTML = "";
         data.categories.forEach(c => {
             const option = document.createElement("option");
@@ -48,7 +83,6 @@ async function fetchDropdowns() {
             categorySelect.appendChild(option);
         });
 
-        // 2️⃣ Populate income sources
         incomeSourceSelect.innerHTML = "";
         data.incomeSources.forEach(s => {
             const option = document.createElement("option");
@@ -57,7 +91,6 @@ async function fetchDropdowns() {
             incomeSourceSelect.appendChild(option);
         });
 
-        // 3️⃣ Populate recurring frequencies
         incomeFrequencySelect.innerHTML = "";
         data.recurringFrequencies.forEach(f => {
             const option = document.createElement("option");
@@ -66,23 +99,21 @@ async function fetchDropdowns() {
             incomeFrequencySelect.appendChild(option);
         });
 
-        // Disable frequency dropdown by default
         incomeFrequencySelect.disabled = true;
 
     } catch (err) {
-        console.error("Error fetching dropdowns:", err);
+        console.error("Dropdown error:", err);
     }
 }
 
 // ------------------------
-// Fetch transactions from server
+// Fetch transactions
 // ------------------------
 async function fetchTransactions() {
     try {
-        const res = await fetch("/api/transactions", {
-            headers: { "Authorization": `Bearer ${localStorage.getItem("token")}` }
-        });
-        if (!res.ok) throw new Error("Failed to fetch transactions");
+        const res = await authFetch("/api/transactions");
+        if (!res) return;
+
         userTransactions = await res.json();
         renderTransactions();
     } catch (err) {
@@ -169,34 +200,27 @@ function renderTransactions() {
 }
 
 // ------------------------
-// Update modal fields based on type
+// Type toggle
 // ------------------------
 function handleTypeChange() {
     if (typeSelect.value === "income") {
         descriptionInput.style.display = "none";
         categoryWrapper.style.display = "none";
-
         incomeSourceWrapper.style.display = "block";
         incomeRepeatingWrapper.style.display = "flex";
-
-        // Recurring dropdown always visible, disabled initially
         incomeFrequencyWrapper.style.display = "block";
         incomeFrequencySelect.disabled = !incomeRepeatingCheckbox.checked;
     } else {
         descriptionInput.style.display = "block";
         categoryWrapper.style.display = "block";
-
         incomeSourceWrapper.style.display = "none";
-        incomeRepeatingWrapper.style.display = "none";  // Hide completely for expense
-        incomeFrequencyWrapper.style.display = "none"; // Hide completely for expense
+        incomeRepeatingWrapper.style.display = "none";
+        incomeFrequencyWrapper.style.display = "none";
         incomeRepeatingCheckbox.checked = false;
         incomeFrequencySelect.disabled = true;
     }
 }
 
-// ------------------------
-// Recurring checkbox toggle
-// ------------------------
 incomeRepeatingCheckbox.addEventListener("change", () => {
     incomeFrequencySelect.disabled = !incomeRepeatingCheckbox.checked;
 });
@@ -208,37 +232,29 @@ addTransactionForm.addEventListener("submit", async (e) => {
     e.preventDefault();
 
     const type = typeSelect.value;
-    const amount = parseFloat(document.getElementById("amount").value);
-    const date = document.getElementById("date").value;
-    const description = descriptionInput.value;
-    const categoryId = type === "expense" ? categorySelect.value : null;
-    const source = type === "income" ? incomeSourceSelect.value : null;
-    const repeating = type === "income" ? incomeRepeatingCheckbox.checked : false;
-    const frequency = repeating ? incomeFrequencySelect.value : null;
+    const body = {
+        type,
+        amount: parseFloat(document.getElementById("amount").value),
+        date: document.getElementById("date").value,
+        description: descriptionInput.value,
+        categoryId: type === "expense" ? categorySelect.value : null,
+        source: type === "income" ? incomeSourceSelect.value : null,
+        repeating: incomeRepeatingCheckbox.checked,
+        frequency: incomeRepeatingCheckbox.checked ? incomeFrequencySelect.value : null
+    };
 
     try {
-        const res = await fetch("/api/transactions", {
+        const res = await authFetch("/api/transactions", {
             method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${localStorage.getItem("token")}`
-            },
-            body: JSON.stringify({ type, amount, date, description, categoryId, source, repeating, frequency })
+            body: JSON.stringify(body)
         });
+        if (!res) return;
 
-        if (!res.ok) throw new Error("Failed to add transaction");
-
-        // Immediately fetch and render transactions without page refresh
         await fetchTransactions();
 
-        // Reset modal form and state
         addTransactionForm.reset();
-        typeSelect.value = "expense";
-        incomeRepeatingCheckbox.checked = false;
-        incomeFrequencySelect.disabled = true;
         addTransactionModal.classList.add("hidden");
-
-        handleTypeChange(); // ensures fields visibility matches default type
+        handleTypeChange();
 
     } catch (err) {
         console.error(err);
@@ -249,63 +265,62 @@ addTransactionForm.addEventListener("submit", async (e) => {
 // Delete transaction
 // ------------------------
 async function deleteTransaction(type, id) {
-    try {
-        const res = await fetch(`/api/transactions/${type}/${id}`, {
-            method: "DELETE",
-            headers: { "Authorization": `Bearer ${localStorage.getItem("token")}` }
-        });
-        if (!res.ok) throw new Error("Failed to delete transaction");
-        fetchTransactions();
-    } catch (err) {
-        console.error(err);
-    }
+    const res = await authFetch(`/api/transactions/${type}/${id}`, {
+        method: "DELETE"
+    });
+    if (!res) return;
+
+    fetchTransactions();
 }
 
 // ------------------------
-// Clear all transactions
+// Clear all
 // ------------------------
 clearTransactionsButton.addEventListener("click", async () => {
-    if (!confirm("Are you sure you want to clear all transactions? This cannot be undone.")) return;
+    if (!confirm("Clear all transactions?")) return;
 
-    try {
-        const res = await fetch("/api/transactions", {
-            method: "DELETE",
-            headers: { "Authorization": `Bearer ${localStorage.getItem("token")}` }
-        });
-        if (!res.ok) throw new Error("Failed to clear transactions");
-        fetchTransactions();
-    } catch (err) {
-        console.error(err);
-    }
+    const res = await authFetch("/api/transactions", {
+        method: "DELETE"
+    });
+    if (!res) return;
+
+    fetchTransactions();
 });
 
 // ------------------------
-// Modal open/close
+// Modal
 // ------------------------
 addTransactionBtn.addEventListener("click", () => {
-    // Reset form
     addTransactionForm.reset();
-
-    // Default type to expense
     typeSelect.value = "expense";
-
-    // Reset recurring checkbox and dropdown
     incomeRepeatingCheckbox.checked = false;
     incomeFrequencySelect.disabled = true;
 
-    // Show modal first
     addTransactionModal.classList.remove("hidden");
-
-    // Apply type logic
     handleTypeChange();
 });
 
 typeSelect.addEventListener("change", handleTypeChange);
-
-closeModalBtn.addEventListener("click", () => addTransactionModal.classList.add("hidden"));
+closeModalBtn.addEventListener("click", () =>
+    addTransactionModal.classList.add("hidden")
+);
 
 // ------------------------
-// Initial fetch
+// Logout
+// ------------------------
+function logout() {
+    localStorage.removeItem("token");
+    window.location.replace("/login.html");
+}
+
+if (logoutBtn) {
+    logoutBtn.addEventListener("click", () => {
+        if (confirm("Are you sure you want to log out?")) logout();
+    });
+}
+
+// ------------------------
+// Init
 // ------------------------
 fetchDropdowns();
 fetchTransactions();

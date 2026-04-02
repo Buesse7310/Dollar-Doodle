@@ -113,6 +113,14 @@ function handleCredentialResponse(response) {
 // Initialize forms and Google login
 // ------------------------
 document.addEventListener("DOMContentLoaded", () => {
+
+  // Show session expired message if redirected
+  const params = new URLSearchParams(window.location.search);
+  if (params.get("expired") === "1") {
+    const expiredDiv = document.getElementById("session-expired");
+    if (expiredDiv) expiredDiv.style.display = "block";
+  }
+
   // Email/password login
   const loginForm = document.getElementById("login-form");
   if (loginForm) {

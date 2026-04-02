@@ -86,14 +86,14 @@ button {
   box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
 }
 
-#logoutBtn,
+#logout-btn,
 #clearBtn,
 button.delete-btn {
   background-color: #d32f2f;
   color: #fff;
 }
 
-#logoutBtn:hover,
+#logout-btn:hover,
 #clearBtn:hover,
 button.delete-btn:hover {
   background-color: #b71c1c;
@@ -101,13 +101,13 @@ button.delete-btn:hover {
 
 #add-expense-btn,
 form button[type="submit"] {
-  background-color: #357a38;
+  background-color: #1B3A6C;
   color: #fff;
 }
 
 #add-expense-btn:hover,
 form button[type="submit"]:hover {
-  background-color: #2e6130;
+  background-color: #1F3E6C;
 }
 
 /* =========================
@@ -329,7 +329,7 @@ button.delete-btn {
     width: 100%;
   }
 
-  #logoutBtn {
+  #logout-btn {
     float: none;
     margin-bottom: 1rem;
   }
