@@ -1,225 +1,326 @@
-// Get JWT token from localStorage
+// ------------------------
+// Auth check (JWT)
+// ------------------------
 const token = localStorage.getItem("token");
 
-// Redirect to login if token missing
 if (!token) {
-    window.location.href = "login.html";
+    window.location.replace("/login.html");
 }
 
-// DOM elements
-const expensesList = document.getElementById("transactions");
-const balanceDisplay = document.getElementById("balance");
-const welcomeMessage = document.getElementById("welcome");
-const clearExpensesButton = document.getElementById("clearBtn");
-const categoryDropdown = document.getElementById("category");
-
-// State
-let userExpenses = [];
-
-// Helper: fetch with token automatically
+// ------------------------
+// Auth Fetch Helper
+// ------------------------
 async function authFetch(url, options = {}) {
-    options.headers = {
-        ...options.headers,
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-    };
-    const res = await fetch(url, options);
-    if (!res.ok) {
-        const data = await res.json().catch(() => ({}));
-        throw new Error(data.error || "API error");
-    }
-    return res.json();
-}
-
-// Load user info, categories, and expenses
-async function loadDashboard() {
-    try {
-        const data = await authFetch("/api/dashboard");
-        welcomeMessage.textContent = `Welcome, ${data.user.firstName || data.user.email}!`;
-
-        await loadCategories();
-        await loadExpenses();
-    } catch (err) {
-        console.error("Dashboard load error:", err);
-        alert(err.message);
+    const token = localStorage.getItem("token");
+    if (!token) {
         logout();
+        return;
     }
+
+    options.headers = {
+        ...(options.headers || {}),
+        "Authorization": `Bearer ${token}`,
+        "Content-Type": "application/json"
+    };
+
+    const res = await fetch(url, options);
+
+    if (res.status === 401) {
+        // Token expired, redirect to login with expired flag
+        window.location.replace("/login.html?expired=1");
+        return null;
+    }
+
+    return res;
 }
 
-// Load categories from DB
-async function loadCategories() {
-    try {
-        const categories = await authFetch("/api/categories");
+// ------------------------
+// Dashboard Elements
+// ------------------------
+const welcomeDisplay = document.getElementById("welcome");
+const balanceDisplay = document.getElementById("balance");
+const transactionsList = document.getElementById("transactions");
+const addTransactionBtn = document.getElementById("add-expense-btn");
+const clearTransactionsButton = document.getElementById("clearBtn");
 
-        categoryDropdown.innerHTML = '<option value="">Select category</option>';
-        categories.forEach(c => {
+const addTransactionModal = document.getElementById("add-expense-modal");
+const closeModalBtn = addTransactionModal.querySelector(".close-btn");
+const addTransactionForm = document.getElementById("add-expense-form");
+
+const typeSelect = document.getElementById("type");
+const descriptionInput = document.getElementById("description");
+const categoryWrapper = document.getElementById("category-wrapper");
+const categorySelect = document.getElementById("category");
+
+const incomeSourceWrapper = document.getElementById("income-source-wrapper");
+const incomeSourceSelect = document.getElementById("income-source");
+
+const incomeRepeatingWrapper = document.getElementById("income-repeating-wrapper");
+const incomeRepeatingCheckbox = document.getElementById("income-repeating");
+
+const incomeFrequencyWrapper = document.getElementById("income-frequency-wrapper");
+const incomeFrequencySelect = document.getElementById("income-frequency");
+
+const logoutBtn = document.getElementById("logout-btn");
+
+let userTransactions = [];
+
+// ------------------------
+// Fetch dropdown data
+// ------------------------
+async function fetchDropdowns() {
+    try {
+        const res = await authFetch("/api/db-lookup");
+        if (!res) return;
+
+        const data = await res.json();
+
+        categorySelect.innerHTML = "";
+        data.categories.forEach(c => {
             const option = document.createElement("option");
             option.value = c.Category_ID;
             option.textContent = c.Category_Name;
-            categoryDropdown.appendChild(option);
+            categorySelect.appendChild(option);
         });
+
+        incomeSourceSelect.innerHTML = "";
+        data.incomeSources.forEach(s => {
+            const option = document.createElement("option");
+            option.value = s;
+            option.textContent = s;
+            incomeSourceSelect.appendChild(option);
+        });
+
+        incomeFrequencySelect.innerHTML = "";
+        data.recurringFrequencies.forEach(f => {
+            const option = document.createElement("option");
+            option.value = f;
+            option.textContent = f;
+            incomeFrequencySelect.appendChild(option);
+        });
+
+        incomeFrequencySelect.disabled = true;
+
     } catch (err) {
-        console.error("Load categories error:", err);
-        alert(err.message);
+        console.error("Dropdown error:", err);
     }
 }
 
-// Load expenses
-async function loadExpenses() {
+// ------------------------
+// Fetch transactions
+// ------------------------
+async function fetchTransactions() {
     try {
-        userExpenses = await authFetch("/api/expenses");
-        renderExpenses();
+        const res = await authFetch("/api/transactions");
+        if (!res) return;
+
+        userTransactions = await res.json();
+        renderTransactions();
     } catch (err) {
-        console.error("Load expenses error:", err);
-        alert(err.message);
+        console.error(err);
     }
 }
 
-// Render expenses list
-function renderExpenses() {
-    expensesList.innerHTML = "";
+// ------------------------
+// Render transactions & balance
+// ------------------------
+function renderTransactions() {
+    transactionsList.innerHTML = "";
+
+    if (userTransactions.length === 0) {
+        const placeholder = document.createElement("p");
+        placeholder.textContent = "No transactions yet. Click 'Add Transaction' to get started.";
+        placeholder.style.textAlign = "center";
+        placeholder.style.marginBottom = "1rem";
+        transactionsList.appendChild(placeholder);
+    }
 
     let total = 0;
 
-    userExpenses.forEach(e => {
+    userTransactions.forEach(t => {
         const li = document.createElement("li");
         li.classList.add("transaction-item");
 
-        // Description left
         const descSpan = document.createElement("span");
         descSpan.classList.add("transaction-desc");
-        descSpan.textContent = e.Expense_Description || "";
+        descSpan.textContent = t.type === "expense" ? t.description || "(No description)" : t.source;
 
-        // Category below description
-        const categorySpan = document.createElement("span");
-        categorySpan.classList.add("transaction-category");
-        categorySpan.textContent = `[${e.Category_Name}]`;
+        const typeSpan = document.createElement("span");
+        typeSpan.classList.add("transaction-category");
+        typeSpan.textContent = t.type === "expense" ? `[${t.category}]` :
+            t.repeating ? `Recurring (${t.frequency})` : "One-time";
+
+        const dateSpan = document.createElement("span");
+        dateSpan.classList.add("transaction-date");
+        dateSpan.textContent = new Date(t.date).toLocaleDateString();
 
         const leftDiv = document.createElement("div");
         leftDiv.appendChild(descSpan);
-        leftDiv.appendChild(categorySpan);
+        leftDiv.appendChild(typeSpan);
+        leftDiv.appendChild(dateSpan);
 
-        // Amount center
         const amountSpan = document.createElement("span");
-        const amt = parseFloat(e.Expense_Amount).toFixed(2);
-        amountSpan.textContent = `-$${amt}`;
+        const amt = parseFloat(t.amount).toFixed(2);
+        amountSpan.textContent = t.type === "expense" ? `-$${amt}` : `+$${amt}`;
         amountSpan.classList.add("expense-amount");
+        amountSpan.style.color = t.type === "expense" ? "#d32f2f" : "#357a38";
 
-        // Delete button right
         const delBtn = document.createElement("button");
         delBtn.textContent = "Delete";
         delBtn.classList.add("delete-btn");
-        delBtn.onclick = () => deleteExpense(e.Expense_ID);
+        delBtn.onclick = () => {
+            if (confirm("Are you sure you want to delete this transaction?")) {
+                deleteTransaction(t.type, t.id);
+            }
+        };
 
         li.appendChild(leftDiv);
         li.appendChild(amountSpan);
         li.appendChild(delBtn);
 
-        expensesList.appendChild(li);
+        transactionsList.appendChild(li);
 
-        total -= parseFloat(e.Expense_Amount);
+        total += t.type === "income" ? parseFloat(t.amount) : -parseFloat(t.amount);
     });
 
     let formattedBalance;
     if (total < 0) {
         formattedBalance = `-$${Math.abs(total).toFixed(2)}`;
-        balanceDisplay.style.color = "#ff4c4c"; // red
+        balanceDisplay.style.color = "#d32f2f";
     } else if (total > 0) {
         formattedBalance = `$${total.toFixed(2)}`;
-        balanceDisplay.style.color = "#4caf50"; // green
+        balanceDisplay.style.color = "#357a38";
     } else {
         formattedBalance = `$0.00`;
-        balanceDisplay.style.color = "#333"; // default
+        balanceDisplay.style.color = "#333";
     }
 
     balanceDisplay.textContent = `Balance: ${formattedBalance}`;
-
-    clearExpensesButton.style.display = userExpenses.length ? "block" : "none";
+    clearTransactionsButton.style.display = userTransactions.length ? "block" : "none";
 }
 
-// Add new expense
-async function addExpense(e) {
-    e?.preventDefault();
-
-    const description = document.getElementById("description").value.trim();
-    const amount = parseFloat(document.getElementById("amount").value);
-    const categoryId = parseInt(categoryDropdown.value);
-
-    if (!amount || !categoryId) {
-        alert("Enter valid amount and select category");
-        return;
-    }
-
-    try {
-        const data = await authFetch("/api/expenses", {
-            method: "POST",
-            body: JSON.stringify({
-                amount,
-                categoryId,
-                description,
-                date: new Date().toISOString().slice(0, 10)
-            })
-        });
-
-        userExpenses.push({
-            Expense_ID: data.expenseId,
-            Expense_Amount: amount,
-            Expense_Description: description,
-            Category_Name: categoryDropdown.selectedOptions[0].text
-        });
-
-        renderExpenses();
-
-        document.getElementById("description").value = "";
-        document.getElementById("amount").value = "";
-        categoryDropdown.value = "";
-    } catch (err) {
-        console.error("Add expense error:", err);
-        alert(err.message);
+// ------------------------
+// Type toggle
+// ------------------------
+function handleTypeChange() {
+    if (typeSelect.value === "income") {
+        descriptionInput.style.display = "none";
+        categoryWrapper.style.display = "none";
+        incomeSourceWrapper.style.display = "block";
+        incomeRepeatingWrapper.style.display = "flex";
+        incomeFrequencyWrapper.style.display = "block";
+        incomeFrequencySelect.disabled = !incomeRepeatingCheckbox.checked;
+    } else {
+        descriptionInput.style.display = "block";
+        categoryWrapper.style.display = "block";
+        incomeSourceWrapper.style.display = "none";
+        incomeRepeatingWrapper.style.display = "none";
+        incomeFrequencyWrapper.style.display = "none";
+        incomeRepeatingCheckbox.checked = false;
+        incomeFrequencySelect.disabled = true;
     }
 }
 
-// Delete expense
-async function deleteExpense(id) {
-    if (!confirm("Delete this expense?")) return;
-
-    try {
-        await authFetch(`/api/expenses/${id}`, { method: "DELETE" });
-        userExpenses = userExpenses.filter(e => e.Expense_ID !== id);
-        renderExpenses();
-    } catch (err) {
-        console.error("Delete expense error:", err);
-        alert(err.message);
-    }
-}
-
-// Clear all expenses
-async function clearExpenses() {
-    if (!confirm("Are you sure you want to clear all expenses?")) return;
-
-    try {
-        await authFetch("/api/expenses", { method: "DELETE" });
-        userExpenses = [];
-        renderExpenses();
-        alert("All expenses cleared!");
-    } catch (err) {
-        console.error("Clear expenses error:", err);
-        alert(err.message);
-    }
-}
-
-// Logout
-function logout() {
-    localStorage.removeItem("token");
-    window.location.href = "login.html";
-}
-
-// Attach event listeners
-document.addEventListener("DOMContentLoaded", () => {
-    document.getElementById("logoutBtn").addEventListener("click", logout);
-    document.getElementById("add-expense-form").addEventListener("submit", addExpense);
-    clearExpensesButton.addEventListener("click", clearExpenses);
+incomeRepeatingCheckbox.addEventListener("change", () => {
+    incomeFrequencySelect.disabled = !incomeRepeatingCheckbox.checked;
 });
 
-// Initial load
-loadDashboard();
+// ------------------------
+// Add transaction
+// ------------------------
+addTransactionForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const type = typeSelect.value;
+    const body = {
+        type,
+        amount: parseFloat(document.getElementById("amount").value),
+        date: document.getElementById("date").value,
+        description: descriptionInput.value,
+        categoryId: type === "expense" ? categorySelect.value : null,
+        source: type === "income" ? incomeSourceSelect.value : null,
+        repeating: incomeRepeatingCheckbox.checked,
+        frequency: incomeRepeatingCheckbox.checked ? incomeFrequencySelect.value : null
+    };
+
+    try {
+        const res = await authFetch("/api/transactions", {
+            method: "POST",
+            body: JSON.stringify(body)
+        });
+        if (!res) return;
+
+        await fetchTransactions();
+
+        addTransactionForm.reset();
+        addTransactionModal.classList.add("hidden");
+        handleTypeChange();
+
+    } catch (err) {
+        console.error(err);
+    }
+});
+
+// ------------------------
+// Delete transaction
+// ------------------------
+async function deleteTransaction(type, id) {
+    const res = await authFetch(`/api/transactions/${type}/${id}`, {
+        method: "DELETE"
+    });
+    if (!res) return;
+
+    fetchTransactions();
+}
+
+// ------------------------
+// Clear all
+// ------------------------
+clearTransactionsButton.addEventListener("click", async () => {
+    if (!confirm("Clear all transactions?")) return;
+
+    const res = await authFetch("/api/transactions", {
+        method: "DELETE"
+    });
+    if (!res) return;
+
+    fetchTransactions();
+});
+
+// ------------------------
+// Modal
+// ------------------------
+addTransactionBtn.addEventListener("click", () => {
+    addTransactionForm.reset();
+    typeSelect.value = "expense";
+    incomeRepeatingCheckbox.checked = false;
+    incomeFrequencySelect.disabled = true;
+
+    addTransactionModal.classList.remove("hidden");
+    handleTypeChange();
+});
+
+typeSelect.addEventListener("change", handleTypeChange);
+closeModalBtn.addEventListener("click", () =>
+    addTransactionModal.classList.add("hidden")
+);
+
+// ------------------------
+// Logout
+// ------------------------
+function logout() {
+    localStorage.removeItem("token");
+    window.location.replace("/login.html");
+}
+
+if (logoutBtn) {
+    logoutBtn.addEventListener("click", () => {
+        if (confirm("Are you sure you want to log out?")) logout();
+    });
+}
+
+// ------------------------
+// Init
+// ------------------------
+fetchDropdowns();
+fetchTransactions();

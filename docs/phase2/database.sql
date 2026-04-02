@@ -520,4 +520,3 @@ CREATE TABLE Receipts (
     INDEX idx_receipt_user (User_ID),
     INDEX idx_receipt_uploaded (Rcpt_Uploaded_At)
 );
-
