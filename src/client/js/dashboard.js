@@ -13,6 +13,12 @@ const welcomeMessage = document.getElementById("welcome");
 const clearExpensesButton = document.getElementById("clearBtn");
 const categoryDropdown = document.getElementById("category");
 
+// Modal elements
+const addExpenseBtn = document.getElementById("add-expense-btn");
+const addExpenseModal = document.getElementById("add-expense-modal");
+const closeBtn = addExpenseModal.querySelector(".close-btn");
+const addExpenseForm = document.getElementById("add-expense-form");
+
 // State
 let userExpenses = [];
 
@@ -81,6 +87,19 @@ function renderExpenses() {
 
     let total = 0;
 
+    if (userExpenses.length === 0) {
+        // Show placeholder when no expenses
+        const placeholder = document.createElement("p");
+        placeholder.textContent = "You have no expenses yet.";
+        placeholder.style.textAlign = "center";
+        placeholder.style.marginBottom = "1rem";
+        expensesList.appendChild(placeholder);
+
+        // Hide clear button
+        clearExpensesButton.style.display = "none";
+        return; // stop here since no expenses
+    }
+
     userExpenses.forEach(e => {
         const li = document.createElement("li");
         li.classList.add("transaction-item");
@@ -123,13 +142,13 @@ function renderExpenses() {
     let formattedBalance;
     if (total < 0) {
         formattedBalance = `-$${Math.abs(total).toFixed(2)}`;
-        balanceDisplay.style.color = "#ff4c4c"; // red
+        balanceDisplay.style.color = "#d32f2f";
     } else if (total > 0) {
         formattedBalance = `$${total.toFixed(2)}`;
-        balanceDisplay.style.color = "#4caf50"; // green
+        balanceDisplay.style.color = "#357a38";
     } else {
         formattedBalance = `$0.00`;
-        balanceDisplay.style.color = "#333"; // default
+        balanceDisplay.style.color = "#333";
     }
 
     balanceDisplay.textContent = `Balance: ${formattedBalance}`;
@@ -170,9 +189,13 @@ async function addExpense(e) {
 
         renderExpenses();
 
+        // Clear form fields
         document.getElementById("description").value = "";
         document.getElementById("amount").value = "";
         categoryDropdown.value = "";
+
+        // Close modal
+        addExpenseModal.classList.add("hidden");
     } catch (err) {
         console.error("Add expense error:", err);
         alert(err.message);
@@ -214,10 +237,25 @@ function logout() {
     window.location.replace("login.html");
 }
 
+// --- Modal logic ---
+addExpenseBtn.addEventListener("click", () => {
+    addExpenseModal.classList.remove("hidden");
+});
+
+closeBtn.addEventListener("click", () => {
+    addExpenseModal.classList.add("hidden");
+});
+
+addExpenseModal.addEventListener("click", (e) => {
+    if (e.target === addExpenseModal) {
+        addExpenseModal.classList.add("hidden");
+    }
+});
+
 // Attach event listeners
 document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("logoutBtn").addEventListener("click", logout);
-    document.getElementById("add-expense-form").addEventListener("submit", addExpense);
+    addExpenseForm.addEventListener("submit", addExpense);
     clearExpensesButton.addEventListener("click", clearExpenses);
 });
 

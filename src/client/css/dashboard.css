@@ -1,3 +1,6 @@
+/* =========================
+   Base & Layout
+   ========================= */
 * {
   margin: 0;
   padding: 0;
@@ -57,16 +60,18 @@ html {
   margin-bottom: 0.75rem;
 }
 
-/* Balance & Welcome */
+/* Welcome */
 #welcome {
   font-size: 1.2rem;
 }
 
+/* Balance (center) */
 #balance {
   font-size: 1.5rem;
   font-weight: bold;
   margin-bottom: 1.5rem;
   text-align: center;
+  /* color will be set dynamically in JS based on total */
 }
 
 /* =========================
@@ -86,24 +91,26 @@ button {
 #logoutBtn,
 #clearBtn,
 button.delete-btn {
-  background-color: #ff6b6b;
+  background-color: #d32f2f;
   color: #fff;
 }
 
 #logoutBtn:hover,
 #clearBtn:hover,
 button.delete-btn:hover {
-  background-color: #ff4c4c;
+  background-color: #b71c1c;
 }
 
-/* Submit button for Add Expense */
+/* Add Expense / other buttons */
+#add-expense-btn,
 form button[type="submit"] {
-  background-color: #4facfe;
+  background-color: #357a38;
   color: #fff;
 }
 
+#add-expense-btn:hover,
 form button[type="submit"]:hover {
-  background-color: #3aa0e0;
+  background-color: #2e6130;
 }
 
 /* =========================
@@ -129,7 +136,7 @@ form select {
 
 form input:focus,
 form select:focus {
-  border-color: #4facfe;
+  border-color: #357a38;
 }
 
 /* =========================
@@ -147,7 +154,6 @@ form select:focus {
   font-size: 1rem;
 }
 
-/* Left side: description and category stacked */
 .transaction-item div {
   display: flex;
   flex-direction: column;
@@ -164,42 +170,71 @@ form select:focus {
 
 /* Amount (center) */
 .expense-amount {
-  color: #ff4c4c;
+  color: #d32f2f;
   font-weight: bold;
   margin: 0 1rem;
   min-width: 80px;
   text-align: right;
 }
 
-/* Delete button right */
 button.delete-btn {
   font-size: 0.85rem;
   padding: 0.3rem 0.8rem;
 }
 
-/* Responsive */
-@media (max-width: 600px) {
-  .transaction-item {
-    flex-direction: column;
-    align-items: flex-start;
-  }
+/* =========================
+   Centered Buttons
+   ========================= */
+#add-expense-btn,
+#clearBtn {
+  display: block;
+  margin: 1rem auto;
+}
 
-  .expense-amount {
-    text-align: left;
-    margin: 0.25rem 0;
-  }
+/* =========================
+   Modal
+   ========================= */
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.4);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 999;
+}
 
-  button.delete-btn {
-    align-self: flex-end;
-    margin-top: 0.25rem;
-  }
+.modal.hidden {
+  display: none;
+}
+
+.modal-content {
+  background-color: #fff;
+  padding: 2rem;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 400px;
+  position: relative;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+.close-btn {
+  position: absolute;
+  top: 10px;
+  right: 15px;
+  font-size: 1.5rem;
+  font-weight: bold;
+  cursor: pointer;
 }
 
 /* =========================
    Error messages
    ========================= */
 .error {
-  color: #ff4c4c;
+  color: #d32f2f;
   margin-top: 0.5rem;
   text-align: center;
 }
@@ -225,5 +260,20 @@ button.delete-btn {
   #logoutBtn {
     float: none;
     margin-bottom: 1rem;
+  }
+
+  .transaction-item {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .expense-amount {
+    text-align: left;
+    margin: 0.25rem 0;
+  }
+
+  button.delete-btn {
+    align-self: flex-end;
+    margin-top: 0.25rem;
   }
 }

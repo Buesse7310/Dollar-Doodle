@@ -28,16 +28,24 @@
 
     <div id="balance">Balance: $0</div>
 
-    <!-- Add Expense Form -->
-    <h3>Add Expense</h3>
-    <form id="add-expense-form">
-      <input type="text" id="description" placeholder="Description" />
-      <input type="number" id="amount" placeholder="Amount" step="0.01" />
-      <select id="category">
-        <!-- Categories will be loaded dynamically from DB -->
-      </select>
-      <button type="submit">Add</button>
-    </form>
+    <!-- Add Expense Button -->
+    <button id="add-expense-btn">Add Expense</button>
+
+    <!-- Add Expense Modal -->
+    <div id="add-expense-modal" class="modal hidden">
+      <div class="modal-content">
+        <span class="close-btn">&times;</span>
+        <h3>Add Expense</h3>
+        <form id="add-expense-form">
+          <input type="text" id="description" placeholder="Description" />
+          <input type="number" id="amount" placeholder="Amount" step="0.01" />
+          <select id="category">
+            <!-- Categories will be loaded dynamically -->
+          </select>
+          <button type="submit">Add</button>
+        </form>
+      </div>
+    </div>
 
     <!-- Expenses List -->
     <h3>Expenses</h3>
