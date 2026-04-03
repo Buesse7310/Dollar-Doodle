@@ -60,19 +60,20 @@ CREATE TABLE Categories (
     INDEX idx_category_name (Category_Name)
 );
 
-INSERT INTO Categories (Category_Name) VALUES
-('Food & Dining'),
-('Transportation'),
-('Shopping'),
-('Entertainment'),
-('Bills & Utilities'),
-('Housing'),
-('Healthcare'),
-('Education'),
-('Travel'),
-('Personal Care'),
-('Pets'),
-('Other');
+INSERT INTO categories (Category_Name, Category_Icon, Budget_Percentage) VALUES
+('Food & Dining', '🍔', 0.00),
+('Transportation', '🚗', 0.00),
+('Shopping', '🛍️', 0.00),
+('Entertainment', '🎬', 0.00),
+('Bills & Utilities', '💡', 0.00),
+('Housing', '🏠', 0.00),
+('Healthcare', '🏥', 0.00),
+('Education', '📚', 0.00),
+('Travel', '✈️', 0.00),
+('Personal Care', '💇', 0.00),
+('Pets', '🐶', 0.00),
+('Other', '📦', 0.00);
+
 
 -- Table: Expenses
 CREATE TABLE Expenses (
@@ -489,6 +490,27 @@ CREATE TABLE Budgets_Suggestions (
     CONSTRAINT chk_potential_savings_positive CHECK (Potential_Savings >= 0)
 );
 
+-- Insert data into Budgets_Suggestions (respects User_ID and Category_ID foreign keys)
+INSERT INTO Budgets_Suggestions (User_ID, Category_ID, Suggestion_Text, Potential_Savings) VALUES
+(1, 1, 'Reduce dining out by meal prepping on Sundays. You spent $72.50 on groceries but also $18.25 on lunch.', 75.00),
+(1, 4, 'Cancel unused streaming services. You have Netflix and other subscriptions that total $15.99 monthly.', 190.00),
+(1, 2, 'Use public transit more often instead of Uber. Your $12 Uber ride could be replaced with $3.50 bus fare.', 8.50),
+(2, 3, 'Wait for sales before buying clothes. You spent $120 at Target on regular-priced items.', 40.00),
+(2, 1, 'Make coffee at home. Your $6.50 daily coffee costs $195 per month.', 150.00),
+(3, 5, 'Switch to energy-efficient appliances to reduce your $120 electric bill.', 30.00),
+(3, 1, 'Buy generic brands instead of name brands at Costco.', 25.00),
+(4, 6, 'Consider finding a roommate to share your $1200 rent.', 600.00),
+(4, 7, 'Use generic medications instead of brand name at the pharmacy.', 15.00),
+(5, 8, 'Look for free online courses instead of paid ones.', 25.00),
+(5, 9, 'Book flights on Tuesdays when prices are typically lower.', 50.00),
+(6, 10, 'Learn to cut your own hair or go to a beauty school for discounts.', 30.00),
+(6, 11, 'Buy pet food in bulk to save money.', 20.00),
+(7, 12, 'Track miscellaneous spending - your $40 expense could be categorized better.', 0.00),
+(8, 1, 'Use cashback apps like Rakuten for grocery purchases.', 15.00),
+(9, 3, 'Create a shopping list before going to the mall to avoid impulse buys.', 50.00),
+(10, 2, 'Carpool with coworkers to save on gas.', 25.00);
+
+
 -- Table: Users_Feedbackss
 CREATE TABLE Users_Feedbackss (
     Feedback_ID INT AUTO_INCREMENT PRIMARY KEY,
@@ -506,6 +528,29 @@ CREATE TABLE Users_Feedbackss (
     INDEX idx_feedback_created (Fdbk_Created_At)
 );
 
+-- Insert data into Users_Feedbackss (respects User_ID foreign key)
+INSERT INTO Users_Feedbackss (User_ID, Feedback_Type, Feedback_Message) VALUES
+(1, 'suggestion', 'It would be great to have a dark mode option for the dashboard.'),
+(1, 'general', 'Really loving the app so far! Very helpful for tracking my spending.'),
+(2, 'bug_report', 'The expense chart is not loading properly on mobile devices.'),
+(2, 'suggestion', 'Can you add a feature to export expenses to Excel?'),
+(3, 'general', 'The budget alerts are very useful. Thank you!'),
+(3, 'suggestion', 'Would be nice to have recurring expense templates.'),
+(4, 'bug_report', 'I noticed the category percentages are not calculating correctly.'),
+(4, 'general', 'Great app for managing my monthly budget.'),
+(5, 'suggestion', 'Please add integration with bank accounts for automatic tracking.'),
+(5, 'bug_report', 'The receipt upload feature is not working on Safari.'),
+(6, 'general', 'This app helped me save $200 this month!'),
+(6, 'suggestion', 'Add a feature to split expenses across multiple categories.'),
+(7, 'general', 'Very intuitive interface. Easy to use.'),
+(7, 'bug_report', 'The login page sometimes redirects to a blank screen.'),
+(8, 'suggestion', 'A mobile app version would be amazing.'),
+(8, 'general', 'Good job on the budget vs actual spending comparison.'),
+(9, 'suggestion', 'Add notifications when approaching budget limits.'),
+(9, 'bug_report', 'The date picker is not working on Firefox.'),
+(10, 'general', 'Best budgeting app I have used so far.'),
+(10, 'suggestion', 'Would love to see a yearly summary report.');
+
 -- Table: Receipts
 CREATE TABLE Receipts (
     Receipt_ID INT AUTO_INCREMENT PRIMARY KEY,
@@ -521,16 +566,25 @@ CREATE TABLE Receipts (
     INDEX idx_receipt_uploaded (Rcpt_Uploaded_At)
 );
 
-INSERT INTO categories (Category_Name, Category_Icon, Budget_Percentage) VALUES
-('Food & Dining', '🍔', 0.00),
-('Transportation', '🚗', 0.00),
-('Shopping', '🛍️', 0.00),
-('Entertainment', '🎬', 0.00),
-('Bills & Utilities', '💡', 0.00),
-('Housing', '🏠', 0.00),
-('Healthcare', '🏥', 0.00),
-('Education', '📚', 0.00),
-('Travel', '✈️', 0.00),
-('Personal Care', '💇', 0.00),
-('Pets', '🐶', 0.00),
-('Other', '📦', 0.00);
+-- Insert data into Receipts (respects User_ID foreign key)
+INSERT INTO Receipts (User_ID, Receipt_Image_Url) VALUES
+(1, '/uploads/receipts/user1/walmart_groceries_20260301.jpg'),
+(1, '/uploads/receipts/user1/chipotle_lunch_20260303.jpg'),
+(1, '/uploads/receipts/user1/starbucks_coffee_20260305.jpg'),
+(1, '/uploads/receipts/user1/shell_gas_20260302.jpg'),
+(2, '/uploads/receipts/user2/aldi_groceries_20260302.jpg'),
+(2, '/uploads/receipts/user2/olive_garden_dinner_20260304.jpg'),
+(2, '/uploads/receipts/user2/target_clothes_20260308.jpg'),
+(3, '/uploads/receipts/user3/costco_groceries_20260301.jpg'),
+(3, '/uploads/receipts/user3/electric_bill_20260302.pdf'),
+(3, '/uploads/receipts/user3/internet_bill_20260303.pdf'),
+(4, '/uploads/receipts/user4/rent_receipt_20260301.pdf'),
+(4, '/uploads/receipts/user4/doctor_visit_20260308.jpg'),
+(5, '/uploads/receipts/user5/tuition_payment_20260301.pdf'),
+(5, '/uploads/receipts/user5/flight_ticket_20260302.jpg'),
+(6, '/uploads/receipts/user6/haircut_20260303.jpg'),
+(6, '/uploads/receipts/user6/vet_visit_20260307.jpg'),
+(7, '/uploads/receipts/user7/gift_purchase_20260305.jpg'),
+(8, '/uploads/receipts/user8/walmart_groceries_20260302.jpg'),
+(9, '/uploads/receipts/user9/utility_bills_20260302.pdf'),
+(10, '/uploads/receipts/user10/groceries_20260301.jpg');
