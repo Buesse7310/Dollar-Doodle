@@ -60,7 +60,7 @@ CREATE TABLE Categories (
     INDEX idx_category_name (Category_Name)
 );
 
-INSERT INTO categories (Category_Name, Category_Icon, Budget_Percentage) VALUES
+INSERT INTO Categories (Category_Name, Category_Icon, Budget_Percentage) VALUES
 ('Food & Dining', '🍔', 0.00),
 ('Transportation', '🚗', 0.00),
 ('Shopping', '🛍️', 0.00),
