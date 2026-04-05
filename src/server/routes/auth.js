@@ -28,6 +28,9 @@ router.post("/register", async (req, res) => {
     );
 
     if (existing.length > 0) {
+      if (existing[0].User_Auth_Type === "google") {
+        return res.status(400).json({ error: "This email is registered via Google. Please log in with Google." });
+      }
       return res.status(400).json({ error: "User already exists" });
     }
 
@@ -56,8 +59,9 @@ router.post("/login", async (req, res) => {
   }
 
   try {
+    // Look up user by email and get auth type
     const [rows] = await db.execute(
-      "SELECT User_ID, User_email, User_Pswrd FROM Users WHERE User_email = ?",
+      "SELECT User_ID, User_email, User_Pswrd, User_Auth_Type FROM Users WHERE User_email = ?",
       [email.trim()]
     );
 
@@ -66,17 +70,26 @@ router.post("/login", async (req, res) => {
     }
 
     const user = rows[0];
+
+    // Prevent login if user was created with Google
+    if (user.User_Auth_Type !== "email") {
+      return res.status(400).json({ error: "Please log in using Google" });
+    }
+
+    // Check password
     const validPassword = await bcrypt.compare(password.trim(), user.User_Pswrd);
 
     if (!validPassword) {
       return res.status(400).json({ error: "Invalid password" });
     }
 
+    // Update last login timestamp
     await db.execute(
       "UPDATE Users SET User_Last_login = CURRENT_TIMESTAMP WHERE User_ID = ?",
       [user.User_ID]
     );
 
+    // Issue JWT
     const token = jwt.sign(
       { id: user.User_ID, email: user.User_email },
       SECRET,
@@ -98,7 +111,7 @@ router.post("/google-login", async (req, res) => {
 
   try {
     // Verify token with Google
-    const ticket = await client.verifyIdToken({
+    const ticket = await googleClient.verifyIdToken({
       idToken: token,
       audience: process.env.GOOGLE_CLIENT_ID,
     });
@@ -106,10 +119,14 @@ router.post("/google-login", async (req, res) => {
     const payload = ticket.getPayload();
     const { sub, email, given_name, family_name } = payload;
 
+    if (!email) {
+      return res.status(400).json({ error: "Google account has no email" });
+    }
+
     // Check if user exists
     const [rows] = await db.execute(
-      "SELECT User_ID FROM Users WHERE User_email = ?",
-      [email]
+      "SELECT User_ID, User_Auth_Type FROM Users WHERE User_email = ?",
+      [email.trim()]
     );
 
     let userId;
@@ -124,6 +141,10 @@ router.post("/google-login", async (req, res) => {
       );
       userId = result.insertId;
     } else {
+      // If user exists but was created with email/password, block Google login
+      if (rows[0].User_Auth_Type !== "google") {
+        return res.status(400).json({ error: "Please log in using email/password" });
+      }
       userId = rows[0].User_ID;
     }
 
