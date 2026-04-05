@@ -66,7 +66,7 @@ router.post("/login", async (req, res) => {
     );
 
     if (rows.length === 0) {
-      return res.status(400).json({ error: "User not found" });
+      return res.status(400).json({ error: "Invalid email or password" });
     }
 
     const user = rows[0];
@@ -80,7 +80,7 @@ router.post("/login", async (req, res) => {
     const validPassword = await bcrypt.compare(password.trim(), user.User_Pswrd);
 
     if (!validPassword) {
-      return res.status(400).json({ error: "Invalid password" });
+      return res.status(400).json({ error: "Invalid email or password" });
     }
 
     // Update last login timestamp
