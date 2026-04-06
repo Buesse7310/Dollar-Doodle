@@ -17,7 +17,7 @@ DROP TABLE IF EXISTS Users;
 CREATE TABLE Users (
     User_ID INT AUTO_INCREMENT PRIMARY KEY,
     User_email VARCHAR(255) UNIQUE NOT NULL,
-    User_Pswrd VARCHAR(255) NOT NULL,
+    User_Pswrd VARCHAR(255) NULL,
     User_FirstName VARCHAR(100) NOT NULL,
     User_LastName VARCHAR(100) NOT NULL,
     User_picture VARCHAR(500),
