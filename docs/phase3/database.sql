@@ -275,4 +275,3 @@ INSERT INTO Incomes (User_ID, Income_Amount, Income_Source, Income_Date, Income_
 
 ALTER TABLE Expenses ADD FOREIGN KEY (Receipt_ID) REFERENCES Receipts(Receipt_ID) ON DELETE SET NULL;
 
--- =====================================================
