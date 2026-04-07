@@ -117,5 +117,45 @@ The server is now running on <http://localhost:5000> and nodemon will automatica
 
 ---
 
+### 5. Team Setup Guide for Veryfi API
+
+# Check if Node.js and Git are installed
+node -v
+npm -v
+git -v
+
+# If any command fails, install the missing dependency first
+
+### 1. Clone the repository
+git clone https://github.com/Buesse717/Dollar-Doodle.git
+cd Dollar-Doodle
+
+### 2. Install dependencies
+npm install
+
+### 3. Copy environment template files
+cp .env.example .env
+cp .env.veryfi_api_key.example .env.veryfi_api_key
+
+### 4. Get your Veryfi API keys
+# Go to: https://hub.veryfi.com/signup/api/
+# Create a free account
+
+### 5. Add your Veryfi credentials to .env.veryfi_api_key
+# Open the file and replace:
+# VERYFI_CLIENT_ID=your_client_id_here
+# VERYFI_USERNAME=your_username_here
+# VERYFI_API_KEY=your_api_key_here
+
+### 6. Configure your database password in .env
+# Open .env and set your MySQL password:
+# DB_PASSWORD=your_mysql_password
+
+### 7. Start the server
+node server.js
+
+### 8. Open your browser and go to:
+# http://localhost:5000/login.html
+
 > Because managing money shouldn't be a headache.
 
