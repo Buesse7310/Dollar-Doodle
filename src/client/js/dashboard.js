@@ -324,3 +324,131 @@ if (logoutBtn) {
 // ------------------------
 fetchDropdowns();
 fetchTransactions();
+
+// ========== RECEIPT UPLOAD FEATURE ==========
+
+const uploadReceiptBtn = document.getElementById('upload-receipt-btn');
+const receiptInput = document.getElementById('receiptInput');
+const loadingOverlay = document.getElementById('loadingOverlay');
+
+if (uploadReceiptBtn) {
+    uploadReceiptBtn.addEventListener('click', function() {
+        receiptInput.click();
+    });
+}
+
+if (receiptInput) {
+    receiptInput.addEventListener('change', function(event) {
+        if (event.target.files && event.target.files[0]) {
+            processReceipt(event.target.files[0]);
+        }
+    });
+}
+
+async function processReceipt(file) {
+    if (!file) return;
+    
+    if (loadingOverlay) {
+        loadingOverlay.style.display = 'flex';
+    }
+    
+    try {
+        // Step 1: Get receipt data from Veryfi
+        const formData = new FormData();
+        formData.append('receipt', file);
+        
+        const response = await fetch('http://localhost:5000/api/process-receipt', {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+            }
+        });
+        
+        if (!response.ok) {
+            throw new Error('Failed to process receipt');
+        }
+        
+        const receiptData = await response.json();
+        
+        if (!receiptData.line_items || receiptData.line_items.length === 0) {
+            alert('No items found on this receipt. Please try a clearer image.');
+            return;
+        }
+        
+        console.log('Found', receiptData.line_items.length, 'line items');
+        
+        // Step 2: Categorize each line item
+        const categorizeResponse = await fetch('http://localhost:5000/api/categorize-items', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+            },
+            body: JSON.stringify({
+                lineItems: receiptData.line_items
+            })
+        });
+        
+        if (!categorizeResponse.ok) {
+            throw new Error('Failed to categorize items');
+        }
+        
+        const categorizeData = await categorizeResponse.json();
+        const categorizedItems = categorizeData.categorizedItems || [];
+        
+        // Step 3: Show breakdown to user
+        let itemsList = '';
+        let totalAmount = 0;
+        
+        categorizedItems.forEach((item, index) => {
+            itemsList += `${index + 1}. ${item.description}\n   $${item.total.toFixed(2)} → ${item.category_name}\n\n`;
+            totalAmount += item.total;
+        });
+        
+        const confirmMessage = `📋 RECEIPT BREAKDOWN\n\nStore: ${receiptData.vendor?.name || 'Unknown'}\nDate: ${receiptData.date || new Date().toLocaleDateString()}\n\nITEMS (${categorizedItems.length}):\n${itemsList}━━━━━━━━━━━━━━━━━━━━\nTOTAL: $${totalAmount.toFixed(2)}\n\nDo you want to save all items as separate transactions?`;
+        
+        if (confirm(confirmMessage)) {
+            // Step 4: Save each item as an expense
+            let savedCount = 0;
+            
+            for (const item of categorizedItems) {
+                const saveResponse = await fetch('http://localhost:5000/api/transactions', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    },
+                    body: JSON.stringify({
+                        type: 'expense',
+                        amount: item.total,
+                        description: item.description,
+                        date: receiptData.date || new Date().toISOString().split('T')[0],
+                        categoryId: item.category_id,
+                        source: null,
+                        repeating: false,
+                        frequency: null
+                    })
+                });
+                
+                if (saveResponse.ok) {
+                    savedCount++;
+                }
+            }
+            
+            alert(`✅ Success! Saved ${savedCount} transactions from your receipt.`);
+            location.reload();
+        }
+        
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Failed to process receipt: ' + error.message);
+    } finally {
+        if (loadingOverlay) {
+            loadingOverlay.style.display = 'none';
+        }
+        if (receiptInput) {
+            receiptInput.value = '';
+        }
+    }
+}
