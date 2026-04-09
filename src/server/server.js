@@ -203,6 +203,42 @@ app.get("/api/test-env", (req, res) => {
 // start server on specified port
 const PORT = process.env.PORT || 5000;
 
+/// ========== FEEDBACK ENDPOINT ==========
+app.post("/api/feedback", async (req, res) => {
+    console.log('Feedback endpoint called');
+    
+    try {
+        const authHeader = req.headers.authorization;
+        if (!authHeader) {
+            return res.status(401).json({ error: 'No token provided' });
+        }
+        
+        const token = authHeader.split(' ')[1];
+        const jwt = require('jsonwebtoken');
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        const userId = decoded.id;
+        
+        const { type, message } = req.body;
+        
+        if (!type || !message) {
+            return res.status(400).json({ error: 'Type and message required' });
+        }
+        
+        // Make sure table name is correct: users_feedbackss (with two 's')
+        const [result] = await db.query(
+            'INSERT INTO users_feedbackss (User_ID, Feedback_Type, Feedback_Message) VALUES (?, ?, ?)',
+            [userId, type, message]
+        );
+        
+        console.log('Feedback saved, ID:', result.insertId);
+        res.json({ success: true, id: result.insertId });
+        
+    } catch (error) {
+        console.error('Feedback error:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
 app.listen(PORT, () => {
     console.log(`Server running at http://localhost:${PORT}`);
 });

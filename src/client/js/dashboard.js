@@ -451,4 +451,54 @@ async function processReceipt(file) {
             receiptInput.value = '';
         }
     }
+// ========== FEEDBACK FEATURE ==========
+
+// Open modal when button clicked
+const feedbackBtn = document.getElementById('feedback-btn');
+if (feedbackBtn) {
+    feedbackBtn.onclick = function() {
+        document.getElementById('feedback-modal').style.display = 'flex';
+        document.getElementById('feedback-message').value = '';
+        document.getElementById('feedback-type').value = 'suggestion';
+    }
+}
+
+// Close modal when X clicked
+const closeBtn = document.querySelector('.close-feedback-btn');
+if (closeBtn) {
+    closeBtn.onclick = function() {
+        document.getElementById('feedback-modal').style.display = 'none';
+    }
+}
+
+// Submit form
+const feedbackForm = document.getElementById('feedback-form');
+if (feedbackForm) {
+    feedbackForm.onsubmit = async function(e) {
+        e.preventDefault();
+        
+        const type = document.getElementById('feedback-type').value;
+        const message = document.getElementById('feedback-message').value;
+        
+        const token = localStorage.getItem('token');
+        
+        const response = await fetch('http://localhost:5000/api/feedback', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + token
+            },
+            body: JSON.stringify({type: type, message: message})
+        });
+        
+        if (response.ok) {
+            alert('Feedback sent!');
+            document.getElementById('feedback-modal').style.display = 'none';
+            document.getElementById('feedback-message').value = '';
+            document.getElementById('feedback-type').value = 'suggestion';
+        } else {
+            alert('Failed to send feedback');
+        }
+    };
+}
 }
