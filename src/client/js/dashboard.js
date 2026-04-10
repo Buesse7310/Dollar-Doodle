@@ -27,6 +27,7 @@ async function authFetch(url, options = {}) {
 
     if (res.status === 401) {
         // Token expired, redirect to login with expired flag
+        localStorage.removeItem("token");
         window.location.replace("/login.html?expired=1");
         return null;
     }

@@ -1,4 +1,13 @@
 // ------------------------
+// Check if user is already logged in
+// ------------------------
+const token = localStorage.getItem("token");
+
+if (token) {
+    window.location.href = "dashboard.html"
+}
+
+// ------------------------
 // Email/Password Login
 // ------------------------
 async function login() {
