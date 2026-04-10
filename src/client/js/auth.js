@@ -4,7 +4,7 @@
 const token = localStorage.getItem("token");
 
 if (token) {
-    window.location.href = "dashboard.html"
+  window.location.href = "dashboard.html"
 }
 
 // ------------------------
@@ -56,11 +56,17 @@ async function register() {
   const lastName = document.getElementById("lastName").value.trim();
   const email = document.getElementById("email").value.trim();
   const password = document.getElementById("password").value.trim();
+  const confirmPassword = document.getElementById("confirmPassword").value.trim();
   const errorEl = document.getElementById("error");
   errorEl.textContent = "";
 
-  if (!firstName || !lastName || !email || !password) {
+  if (!firstName || !lastName || !email || !password || !confirmPassword) {
     errorEl.textContent = "All fields are required";
+    return;
+  }
+
+  if (password !== confirmPassword) {
+    errorEl.textContent = "Passwords do not match";
     return;
   }
 
@@ -149,7 +155,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // Fetch Google Client ID and initialize Google Sign-In
-const googleButtonContainer = document.querySelector(".g_id_signin");
+  const googleButtonContainer = document.querySelector(".g_id_signin");
   if (!googleButtonContainer) return;
 
   // Wait for the GSI script to load
