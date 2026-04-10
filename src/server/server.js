@@ -7,8 +7,9 @@ const path = require("path");
 
 // Load environment variables
 require("dotenv").config({ path: path.resolve(__dirname, "../../.env") });
+require("dotenv").config({ path: path.resolve(__dirname, "../../.env.veryfi_api_key") });
 
-// serve frontend files
+// serve frontend files - FIXED PATH
 app.use(express.static(path.join(__dirname, "../client")));
 
 // routes
