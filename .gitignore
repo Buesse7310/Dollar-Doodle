@@ -7,7 +7,3 @@ node_modules/
 # MS Office temp files
 *.tmp
 ~$*
-
-.env
-.env.veryfi
-.env.*
