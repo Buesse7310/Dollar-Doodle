@@ -16,7 +16,7 @@ USE Dollar_Doodle;
 CREATE TABLE Users (
     User_ID INT AUTO_INCREMENT PRIMARY KEY,
     User_email VARCHAR(255) UNIQUE NOT NULL,
-    User_Pswrd VARCHAR(255) NOT NULL,
+    User_Pswrd VARCHAR(255) NULL,       -- allow NULL passwords to be compatible with google accounts, NULL passwords are prevented for regular users due to a server side check
     User_FirstName VARCHAR(100) NOT NULL,
     User_LastName VARCHAR(100) NOT NULL,
     User_picture VARCHAR(500),
