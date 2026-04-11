@@ -14,22 +14,24 @@ router.use((req, res, next) => {
 });
 
 /* ----------------------
-   GET all transactions
-   ---------------------- */
+   GET all transactions by order */
+   
 router.get("/", auth, async (req, res) => {
     try {
-        // Expenses
+        // Expenses - NOW WITH ORDER BY (latest first)
         const [expenses] = await db.execute(
             "SELECT e.Expense_ID AS id, e.Expense_Amount AS amount, e.Expense_Description AS description, e.Expense_date AS date, c.Category_Name AS category, 'expense' AS type " +
             "FROM Expenses e JOIN Categories c ON e.Category_ID = c.Category_ID " +
-            "WHERE e.User_ID = ?",
+            "WHERE e.User_ID = ? " +
+            "ORDER BY e.Expense_date DESC, e.Expense_ID DESC",
             [req.user.id]
         );
 
-        // Incomes
+        // Incomes - ALSO with ORDER BY (latest first)
         const [incomes] = await db.execute(
             "SELECT i.Income_ID AS id, i.Income_Amount AS amount, i.Income_Source AS source, i.Income_Date AS date, i.Income_Repeating AS repeating, i.Income_Recurring_frequency AS frequency, 'income' AS type " +
-            "FROM Incomes i WHERE i.User_ID = ?",
+            "FROM Incomes i WHERE i.User_ID = ? " +
+            "ORDER BY i.Income_Date DESC, i.Income_ID DESC",
             [req.user.id]
         );
 

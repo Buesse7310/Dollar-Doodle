@@ -347,103 +347,38 @@ if (receiptInput) {
     });
 }
 
+// ========== Updated Process Receipt Function to save data into receipt_line_itemas after scanning receipts ==========
+
 async function processReceipt(file) {
     if (!file) return;
-
+    
     if (loadingOverlay) {
         loadingOverlay.style.display = 'flex';
     }
-
+    
     try {
         const formData = new FormData();
         formData.append('receipt', file);
-
+        
+        const token = localStorage.getItem('token');
+        
         const response = await fetch('http://localhost:5000/api/process-receipt', {
             method: 'POST',
-            body: formData,
             headers: {
-                'Authorization': `Bearer ${localStorage.getItem('token')}`
-            }
-        });
-
-        if (!response.ok) {
-            throw new Error('Failed to process receipt');
-        }
-
-        const receiptData = await response.json();
-
-        if (!receiptData.line_items || receiptData.line_items.length === 0) {
-            alert('No items found on this receipt. Please try a clearer image.');
-            return;
-        }
-
-        const categorizeResponse = await fetch('http://localhost:5000/api/categorize-items', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${localStorage.getItem('token')}`
+                'Authorization': 'Bearer ' + token
             },
-            body: JSON.stringify({
-                lineItems: receiptData.line_items
-            })
+            body: formData
         });
-
-        if (!categorizeResponse.ok) {
-            throw new Error('Failed to categorize items');
-        }
-
-        const categorizeData = await categorizeResponse.json();
-        const categorizedItems = categorizeData.categorizedItems || [];
-
-        let itemsList = '';
-        let totalAmount = 0;
-
-        categorizedItems.forEach((item, index) => {
-            itemsList += `${index + 1}. ${item.description}\n   $${item.total.toFixed(2)} → ${item.category_name}\n\n`;
-            totalAmount += item.total;
-        });
-
-        const confirmMessage =
-            `📋 RECEIPT BREAKDOWN\n\n` +
-            `Store: ${receiptData.vendor?.name || 'Unknown'}\n` +
-            `Date: ${receiptData.date || new Date().toLocaleDateString()}\n\n` +
-            `ITEMS (${categorizedItems.length}):\n` +
-            `${itemsList}` +
-            `━━━━━━━━━━━━━━━━━━━━\n` +
-            `TOTAL: $${totalAmount.toFixed(2)}\n\n` +
-            `Do you want to save all items as separate transactions?`;
-
-        if (confirm(confirmMessage)) {
-            let savedCount = 0;
-
-            for (const item of categorizedItems) {
-                const saveResponse = await fetch('http://localhost:5000/api/transactions', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${localStorage.getItem('token')}`
-                    },
-                    body: JSON.stringify({
-                        type: 'expense',
-                        amount: item.total,
-                        description: item.description,
-                        date: receiptData.date || new Date().toISOString().split('T')[0],
-                        categoryId: item.category_id,
-                        source: null,
-                        repeating: false,
-                        frequency: null
-                    })
-                });
-
-                if (saveResponse.ok) {
-                    savedCount++;
-                }
-            }
-
-            alert(`✅ Success! Saved ${savedCount} transactions from your receipt.`);
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            alert(`✅ Success! Saved ${result.lineItemsCount} items from your receipt.`);
             location.reload();
+        } else {
+            alert('Failed to process receipt: ' + (result.error || 'Unknown error'));
         }
-
+        
     } catch (error) {
         console.error('Error:', error);
         alert('Failed to process receipt: ' + error.message);
@@ -456,7 +391,6 @@ async function processReceipt(file) {
         }
     }
 }
-
 // ========== FEEDBACK FEATURE ==========
 
 // Open modal
