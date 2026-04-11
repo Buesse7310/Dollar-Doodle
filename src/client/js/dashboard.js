@@ -26,7 +26,6 @@ async function authFetch(url, options = {}) {
     const res = await fetch(url, options);
 
     if (res.status === 401) {
-        // Token expired, redirect to login with expired flag
         localStorage.removeItem("token");
         window.location.replace("/login.html?expired=1");
         return null;
@@ -148,8 +147,11 @@ function renderTransactions() {
 
         const typeSpan = document.createElement("span");
         typeSpan.classList.add("transaction-category");
-        typeSpan.textContent = t.type === "expense" ? `[${t.category}]` :
-            t.repeating ? `Recurring (${t.frequency})` : "One-time";
+        typeSpan.textContent = t.type === "expense"
+            ? `[${t.category}]`
+            : t.repeating
+                ? `Recurring (${t.frequency})`
+                : "One-time";
 
         const dateSpan = document.createElement("span");
         dateSpan.classList.add("transaction-date");
@@ -163,7 +165,6 @@ function renderTransactions() {
         const amountSpan = document.createElement("span");
         const amt = parseFloat(t.amount).toFixed(2);
         amountSpan.textContent = t.type === "expense" ? `-$${amt}` : `+$${amt}`;
-        amountSpan.classList.add("expense-amount");
         amountSpan.style.color = t.type === "expense" ? "#d32f2f" : "#357a38";
 
         const delBtn = document.createElement("button");
@@ -333,13 +334,13 @@ const receiptInput = document.getElementById('receiptInput');
 const loadingOverlay = document.getElementById('loadingOverlay');
 
 if (uploadReceiptBtn) {
-    uploadReceiptBtn.addEventListener('click', function() {
+    uploadReceiptBtn.addEventListener('click', function () {
         receiptInput.click();
     });
 }
 
 if (receiptInput) {
-    receiptInput.addEventListener('change', function(event) {
+    receiptInput.addEventListener('change', function (event) {
         if (event.target.files && event.target.files[0]) {
             processReceipt(event.target.files[0]);
         }
@@ -348,16 +349,15 @@ if (receiptInput) {
 
 async function processReceipt(file) {
     if (!file) return;
-    
+
     if (loadingOverlay) {
         loadingOverlay.style.display = 'flex';
     }
-    
+
     try {
-        // Step 1: Get receipt data from Veryfi
         const formData = new FormData();
         formData.append('receipt', file);
-        
+
         const response = await fetch('http://localhost:5000/api/process-receipt', {
             method: 'POST',
             body: formData,
@@ -365,21 +365,18 @@ async function processReceipt(file) {
                 'Authorization': `Bearer ${localStorage.getItem('token')}`
             }
         });
-        
+
         if (!response.ok) {
             throw new Error('Failed to process receipt');
         }
-        
+
         const receiptData = await response.json();
-        
+
         if (!receiptData.line_items || receiptData.line_items.length === 0) {
             alert('No items found on this receipt. Please try a clearer image.');
             return;
         }
-        
-        console.log('Found', receiptData.line_items.length, 'line items');
-        
-        // Step 2: Categorize each line item
+
         const categorizeResponse = await fetch('http://localhost:5000/api/categorize-items', {
             method: 'POST',
             headers: {
@@ -390,29 +387,35 @@ async function processReceipt(file) {
                 lineItems: receiptData.line_items
             })
         });
-        
+
         if (!categorizeResponse.ok) {
             throw new Error('Failed to categorize items');
         }
-        
+
         const categorizeData = await categorizeResponse.json();
         const categorizedItems = categorizeData.categorizedItems || [];
-        
-        // Step 3: Show breakdown to user
+
         let itemsList = '';
         let totalAmount = 0;
-        
+
         categorizedItems.forEach((item, index) => {
             itemsList += `${index + 1}. ${item.description}\n   $${item.total.toFixed(2)} → ${item.category_name}\n\n`;
             totalAmount += item.total;
         });
-        
-        const confirmMessage = `📋 RECEIPT BREAKDOWN\n\nStore: ${receiptData.vendor?.name || 'Unknown'}\nDate: ${receiptData.date || new Date().toLocaleDateString()}\n\nITEMS (${categorizedItems.length}):\n${itemsList}━━━━━━━━━━━━━━━━━━━━\nTOTAL: $${totalAmount.toFixed(2)}\n\nDo you want to save all items as separate transactions?`;
-        
+
+        const confirmMessage =
+            `📋 RECEIPT BREAKDOWN\n\n` +
+            `Store: ${receiptData.vendor?.name || 'Unknown'}\n` +
+            `Date: ${receiptData.date || new Date().toLocaleDateString()}\n\n` +
+            `ITEMS (${categorizedItems.length}):\n` +
+            `${itemsList}` +
+            `━━━━━━━━━━━━━━━━━━━━\n` +
+            `TOTAL: $${totalAmount.toFixed(2)}\n\n` +
+            `Do you want to save all items as separate transactions?`;
+
         if (confirm(confirmMessage)) {
-            // Step 4: Save each item as an expense
             let savedCount = 0;
-            
+
             for (const item of categorizedItems) {
                 const saveResponse = await fetch('http://localhost:5000/api/transactions', {
                     method: 'POST',
@@ -431,16 +434,16 @@ async function processReceipt(file) {
                         frequency: null
                     })
                 });
-                
+
                 if (saveResponse.ok) {
                     savedCount++;
                 }
             }
-            
+
             alert(`✅ Success! Saved ${savedCount} transactions from your receipt.`);
             location.reload();
         }
-        
+
     } catch (error) {
         console.error('Error:', error);
         alert('Failed to process receipt: ' + error.message);
@@ -452,54 +455,61 @@ async function processReceipt(file) {
             receiptInput.value = '';
         }
     }
-// ========== FEEDBACK FEATURE ==========
-
-// Open modal when button clicked
-const feedbackBtn = document.getElementById('feedback-btn');
-if (feedbackBtn) {
-    feedbackBtn.onclick = function() {
-        document.getElementById('feedback-modal').style.display = 'flex';
-        document.getElementById('feedback-message').value = '';
-        document.getElementById('feedback-type').value = 'suggestion';
-    }
 }
 
-// Close modal when X clicked
-const closeBtn = document.querySelector('.close-feedback-btn');
-if (closeBtn) {
-    closeBtn.onclick = function() {
+// ========== FEEDBACK FEATURE ==========
+
+// Open modal
+const feedbackBtn = document.getElementById('feedback-btn');
+if (feedbackBtn) {
+    feedbackBtn.onclick = function () {
+        document.getElementById('feedback-modal').style.display = 'flex';
+        document.getElementById('feedback-message').value = '';
+    };
+}
+
+// Close modal
+const closeFeedbackBtn = document.querySelector('.close-feedback-btn');
+if (closeFeedbackBtn) {
+    closeFeedbackBtn.onclick = function () {
         document.getElementById('feedback-modal').style.display = 'none';
-    }
+    };
 }
 
 // Submit form
 const feedbackForm = document.getElementById('feedback-form');
 if (feedbackForm) {
-    feedbackForm.onsubmit = async function(e) {
+    feedbackForm.onsubmit = async function (e) {
         e.preventDefault();
-        
+
         const type = document.getElementById('feedback-type').value;
         const message = document.getElementById('feedback-message').value;
-        
-        const token = localStorage.getItem('token');
-        
-        const response = await fetch('http://localhost:5000/api/feedback', {
+
+        if (!message) {
+            alert('Please enter a message');
+            return;
+        }
+
+        const tokenFeedback = localStorage.getItem('token');
+
+        const responseFeedback = await fetch('http://localhost:5000/api/feedback', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': 'Bearer ' + token
+                'Authorization': 'Bearer ' + tokenFeedback
             },
-            body: JSON.stringify({type: type, message: message})
+            body: JSON.stringify({
+                feedback_type: type,
+                feedback_message: message
+            })
         });
-        
-        if (response.ok) {
+
+        if (responseFeedback.ok) {
             alert('Feedback sent!');
             document.getElementById('feedback-modal').style.display = 'none';
             document.getElementById('feedback-message').value = '';
-            document.getElementById('feedback-type').value = 'suggestion';
         } else {
             alert('Failed to send feedback');
         }
     };
-}
 }

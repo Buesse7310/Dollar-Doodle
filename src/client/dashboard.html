@@ -31,10 +31,15 @@
     <!-- Add Transaction Button -->
     <button id="add-expense-btn">Add Transaction</button>
 
-    <!-- code added by Roma for veryfi -->
+    <!-- Receipt Upload -->
     <button id="upload-receipt-btn">📷 Upload Receipt</button>
-<input type="file" id="receiptInput" accept="image/*,application/pdf" style="display: none;">
-<button id="feedback-btn" onclick="document.getElementById('feedback-modal').style.display='flex'" style="position: fixed; bottom: 20px; left: 20px; background-color: #1B3A6C; color: white; padding: 10px 20px; border: none; border-radius: 50px; cursor: pointer;">💬 Send Feedback</button>
+    <input type="file" id="receiptInput" accept="image/*,application/pdf" style="display: none;">
+
+    <!-- Feedback Button (fixed) -->
+    <button id="feedback-btn"
+      style="position: fixed; bottom: 20px; left: 20px; background-color: #1B3A6C; color: white; padding: 10px 20px; border: none; border-radius: 50px; cursor: pointer;">
+      💬 Send Feedback
+    </button>
 
     <!-- Add Transaction Modal -->
     <div id="add-expense-modal" class="modal hidden">
@@ -43,7 +48,6 @@
         <h3>Add Transaction</h3>
         <form id="add-expense-form">
 
-          <!-- Transaction Type -->
           <div id="type-wrapper">
             <select id="type" required>
               <option value="expense" selected>Expense</option>
@@ -51,43 +55,31 @@
             </select>
           </div>
 
-          <!-- Description (expenses only) -->
           <div id="description-wrapper">
             <input type="text" id="description" placeholder="Description" />
           </div>
 
-          <!-- Amount (common) -->
           <div id="amount-wrapper">
             <input type="number" id="amount" placeholder="Amount" step="0.01" required />
           </div>
 
-          <!-- Date (common) -->
           <div id="date-wrapper">
             <input type="date" id="date" required />
           </div>
 
-          <!-- Expense-specific: category -->
           <div id="category-wrapper">
-            <select id="category">
-              <!-- Categories loaded dynamically -->
-            </select>
+            <select id="category"></select>
           </div>
 
-          <!-- Income-specific: source -->
           <div id="income-source-wrapper">
-            <select id="income-source">
-              <!-- Income sources loaded dynamically -->
-            </select>
+            <select id="income-source"></select>
           </div>
 
-          <!-- Income-specific: recurring -->
           <div id="income-repeating-wrapper">
             <label>
               <input type="checkbox" id="income-repeating" /> Recurring Income
             </label>
-            <select id="income-frequency" disabled>
-              <!-- Recurring frequencies loaded dynamically -->
-            </select>
+            <select id="income-frequency" disabled></select>
           </div>
 
           <button type="submit">Add</button>
@@ -95,46 +87,48 @@
       </div>
     </div>
 
-    <!-- Transactions List -->
     <h3>Transactions</h3>
     <ul id="transactions"></ul>
 
-    <!-- Clear All Button -->
     <button id="clearBtn">Clear All</button>
 
     <p id="error" class="error"></p>
   </div>
 
-  <!-- code added by Roma for veryfi -->
-
-  <div id="loadingOverlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 9999; justify-content: center; align-items: center;">
+  <!-- Loading Overlay -->
+  <div id="loadingOverlay"
+    style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 9999; justify-content: center; align-items: center;">
     <div style="background: white; padding: 20px; border-radius: 10px; text-align: center;">
-        <div>Processing receipt...</div>
-        <div>Please wait ⏳</div>
+      <div>Processing receipt...</div>
+      <div>Please wait ⏳</div>
     </div>
-</div>
+  </div>
 
-
-  <script src="js/dashboard.js"></script>
-
-  
-
-<!-- Feedback Modal -->
-<div id="feedback-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1001; justify-content: center; align-items: center;">
+  <!-- Feedback Modal -->
+  <div id="feedback-modal"
+    style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1001; justify-content: center; align-items: center;">
     <div style="background: white; padding: 25px; border-radius: 10px; width: 90%; max-width: 500px;">
-        <span class="close-feedback-btn" onclick="document.getElementById('feedback-modal').style.display='none'" style="float: right; cursor: pointer; font-size: 24px;">&times;</span>
-        <h3>Send Feedback</h3>
-        <form id="feedback-form">
-            <select id="feedback-type" required style="width: 100%; padding: 10px; margin: 10px 0;">
-                <option value="suggestion">💡 Suggestion</option>
-                <option value="bug_report">🐛 Bug Report</option>
-                <option value="general">📝 General</option>
-            </select>
-            <textarea id="feedback-message" placeholder="Your message..." rows="4" required style="width: 100%; padding: 10px; margin: 10px 0;"></textarea>
-            <button type="submit" style="background-color: #1B3A6C; color: white; padding: 10px; border: none; border-radius: 5px; cursor: pointer;">Send Feedback</button>
-        </form>
+      <span class="close-feedback-btn"
+        style="float: right; cursor: pointer; font-size: 24px;">&times;</span>
+      <h3>Send Feedback</h3>
+      <form id="feedback-form">
+        <select id="feedback-type" required style="width: 100%; padding: 10px; margin: 10px 0;">
+          <option value="suggestion">💡 Suggestion</option>
+          <option value="bug_report">🐛 Bug Report</option>
+          <option value="general">📝 General</option>
+        </select>
+        <textarea id="feedback-message" placeholder="Your message..." rows="4" required
+          style="width: 100%; padding: 10px; margin: 10px 0;"></textarea>
+        <button type="submit"
+          style="background-color: #1B3A6C; color: white; padding: 10px; border: none; border-radius: 5px; cursor: pointer;">Send
+          Feedback</button>
+      </form>
     </div>
-</div>
+  </div>
+
 </body>
+
+<!-- ⭐ SCRIPT MUST BE HERE — ONLY HERE -->
+<script src="js/dashboard.js"></script>
 
 </html>
