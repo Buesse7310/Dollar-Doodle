@@ -14,6 +14,7 @@ app.use(express.static(path.join(__dirname, "../client")));
 
 // routes
 app.use("/api/auth", require("./routes/auth"));
+app.use("/api/ai-suggestions", require("./routes/ai-suggestions"));
 app.use("/api/dashboard", require("./routes/dashboard"));
 app.use("/api/transactions", require("./routes/transactions"));
 app.use("/api/db-lookup", require("./routes/db-lookup"));
