@@ -142,3 +142,22 @@ node server.js
 
 > Because managing money shouldn't be a headache.
 
+
+### 6. OpenAI set up
+
+## 1. 
+
+cd src/server
+npm install
+npm install openai
+
+## 2.
+
+cd src/server
+node server.js
+
+## 3.
+
+http://localhost:5000/api/ai-suggestions/1
+
+
