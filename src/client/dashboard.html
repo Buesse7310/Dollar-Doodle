@@ -41,6 +41,22 @@
       💬 Send Feedback
     </button>
 
+    <button id="ai-insights-btn" style="
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background-color: #1B3A6C;
+    color: white;
+    padding: 12px 18px;
+    border: none;
+    border-radius: 50px;
+    cursor: pointer;
+    z-index: 1000;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+  ">
+      🤖 AI Insights
+    </button>
+
     <!-- Add Transaction Modal -->
     <div id="add-expense-modal" class="modal hidden">
       <div class="modal-content">
@@ -108,8 +124,7 @@
   <div id="feedback-modal"
     style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1001; justify-content: center; align-items: center;">
     <div style="background: white; padding: 25px; border-radius: 10px; width: 90%; max-width: 500px;">
-      <span class="close-feedback-btn"
-        style="float: right; cursor: pointer; font-size: 24px;">&times;</span>
+      <span class="close-feedback-btn" style="float: right; cursor: pointer; font-size: 24px;">&times;</span>
       <h3>Send Feedback</h3>
       <form id="feedback-form">
         <select id="feedback-type" required style="width: 100%; padding: 10px; margin: 10px 0;">
@@ -123,6 +138,40 @@
           style="background-color: #1B3A6C; color: white; padding: 10px; border: none; border-radius: 5px; cursor: pointer;">Send
           Feedback</button>
       </form>
+    </div>
+  </div>
+
+  <!-- AI INSIGHTS MODAL -->
+  <div id="ai-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%;
+  background:rgba(0,0,0,0.5); z-index:10000; justify-content:center; align-items:center;">
+
+    <div style="background:white; padding:20px; border-radius:10px; width:90%; max-width:600px;">
+
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <h3>🤖 AI Financial Insights</h3>
+        <span id="close-ai-modal" style="cursor:pointer; font-size:24px;">&times;</span>
+      </div>
+
+      <div id="ai-error" style="display:none; color:red; margin:10px 0; font-weight:500;"></div>
+
+      <div id="ai-loading" style="display:none; margin:10px 0;">
+        Generating insights...
+      </div>
+
+      <div style="display:flex; gap:20px; margin-top:10px;">
+
+        <div style="flex:1;">
+          <h4>📊 Insights</h4>
+          <ul id="ai-insights"></ul>
+        </div>
+
+        <div style="flex:1;">
+          <h4>💡 Suggestions</h4>
+          <ul id="ai-suggestions"></ul>
+        </div>
+
+      </div>
+
     </div>
   </div>
 

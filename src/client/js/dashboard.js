@@ -1,13 +1,4 @@
 // ------------------------
-// Auth check (JWT)
-// ------------------------
-const token = localStorage.getItem("token");
-
-if (!token) {
-    window.location.replace("/login.html");
-}
-
-// ------------------------
 // Auth Fetch Helper
 // ------------------------
 async function authFetch(url, options = {}) {
@@ -46,6 +37,15 @@ const clearTransactionsButton = document.getElementById("clearBtn");
 const addTransactionModal = document.getElementById("add-expense-modal");
 const closeModalBtn = addTransactionModal.querySelector(".close-btn");
 const addTransactionForm = document.getElementById("add-expense-form");
+
+const aiBtn = document.getElementById("ai-insights-btn");
+const aiModal = document.getElementById("ai-modal");
+const closeAiModal = document.getElementById("close-ai-modal");
+const aiError = document.getElementById("ai-error");
+
+const aiLoading = document.getElementById("ai-loading");
+const aiInsightsList = document.getElementById("ai-insights");
+const aiSuggestionsList = document.getElementById("ai-suggestions");
 
 const typeSelect = document.getElementById("type");
 const descriptionInput = document.getElementById("description");
@@ -321,12 +321,6 @@ if (logoutBtn) {
     });
 }
 
-// ------------------------
-// Init
-// ------------------------
-fetchDropdowns();
-fetchTransactions();
-
 // ========== RECEIPT UPLOAD FEATURE ==========
 
 const uploadReceiptBtn = document.getElementById('upload-receipt-btn');
@@ -351,17 +345,17 @@ if (receiptInput) {
 
 async function processReceipt(file) {
     if (!file) return;
-    
+
     if (loadingOverlay) {
         loadingOverlay.style.display = 'flex';
     }
-    
+
     try {
         const formData = new FormData();
         formData.append('receipt', file);
-        
+
         const token = localStorage.getItem('token');
-        
+
         const response = await fetch('http://localhost:5000/api/process-receipt', {
             method: 'POST',
             headers: {
@@ -369,16 +363,16 @@ async function processReceipt(file) {
             },
             body: formData
         });
-        
+
         const result = await response.json();
-        
+
         if (result.success) {
             alert(`✅ Success! Saved ${result.lineItemsCount} items from your receipt.`);
             location.reload();
         } else {
             alert('Failed to process receipt: ' + (result.error || 'Unknown error'));
         }
-        
+
     } catch (error) {
         console.error('Error:', error);
         alert('Failed to process receipt: ' + error.message);
@@ -447,3 +441,85 @@ if (feedbackForm) {
         }
     };
 }
+
+// AI state (prevents spam clicks)
+let aiLoadingState = false;
+
+// AI data renderer
+function renderAI(data) {
+    const insights = data?.insights || [];
+    const suggestions = data?.suggestions || [];
+
+    if (insights.length === 0 && suggestions.length === 0) {
+        aiInsightsList.innerHTML = "<li>No insights available</li>";
+        return;
+    }
+
+    // insights
+    insights.forEach(text => {
+        const li = document.createElement("li");
+        li.textContent = text;
+        aiInsightsList.appendChild(li);
+    });
+
+    // suggestions
+    suggestions.forEach(text => {
+        const li = document.createElement("li");
+        li.textContent = text;
+        aiSuggestionsList.appendChild(li);
+    });
+}
+
+// AI button
+aiBtn.addEventListener("click", async () => {
+    if (aiLoadingState) return; // prevents spam clicks
+    aiLoadingState = true;
+
+    aiModal.style.display = "flex";
+
+    // reset UI
+    aiInsightsList.innerHTML = "";
+    aiSuggestionsList.innerHTML = "";
+    aiError.style.display = "none";
+    aiError.textContent = "";
+
+    aiLoading.style.display = "block";
+
+    try {
+        const res = await authFetch("/api/ai-suggestions");
+
+        if (!res || !res.ok) {
+            throw new Error("Failed to fetch AI suggestions");
+        }
+
+        let data;
+        try {
+            data = await res.json();
+        } catch (err) {
+            throw new Error("Invalid AI response");
+        }
+
+        renderAI(data);
+
+    } catch (err) {
+        console.error("AI error:", err);
+
+        aiError.textContent = "⚠️ Failed to load AI insights. Please try again.";
+        aiError.style.display = "block";
+
+    } finally {
+        aiLoading.style.display = "none";
+        aiLoadingState = false;
+    }
+});
+
+// close modal
+closeAiModal.addEventListener("click", () => {
+    aiModal.style.display = "none";
+});
+
+// ------------------------
+// Init
+// ------------------------
+fetchDropdowns();
+fetchTransactions();
