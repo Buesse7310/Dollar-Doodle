@@ -4,6 +4,9 @@ node_modules/
 # environment variables
 .env
 
+# receipt images
+uploads/
+
 # MS Office temp files
 *.tmp
 ~$*
