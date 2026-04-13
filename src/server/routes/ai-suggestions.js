@@ -1,16 +1,18 @@
 console.log("AI route loaded");
+
 const express = require("express");
 const router = express.Router();
 const db = require("../db-connection");
 const OpenAI = require("openai");
+const auth = require("../middleware/auth");
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY
 });
 
 // GET AI suggestions
-router.get("/:userId", async (req, res) => {
-  const userId = req.params.userId;
+router.get("/", auth, async (req, res) => {
+  const userId = req.user.id;
 
   try {
     // Get user expenses
@@ -33,37 +35,92 @@ router.get("/:userId", async (req, res) => {
     }
 
     // Format for AI
-    const summary = rows
-      .map(r => `${r.Category_Name}: Spent  $${r.spent} / Budget $${r.budget}`)
-      .join("\n");
+    const structuredData = rows.map(r => ({
+      category: r.Category_Name,
+      spent: Number(r.spent),
+      budget: Number(r.budget)
+    }));
 
-    // Prompt
-    const prompt = `
-You are a financial advisor.
 
-Here is a user's spending vs budget:
-${summary}
+    // Prompts
+    const messages = [
+      {
+        role: "system",
+        content: `
+You are a personal finance assistant that analyzes spending and budgeting data.
 
-Give:
-- 3 insights (where they overspend or do well)
-- 3 specific suggestions to improve savings
-Be practical and clear.
-`;
+Your job is to identify spending patterns and help users improve financial habits.
+
+Return ONLY valid JSON. No extra text.
+
+JSON format:
+{
+  "insights": [
+    "string",
+    "string",
+    "string"
+  ],
+  "suggestions": [
+    "string",
+    "string",
+    "string"
+  ]
+}
+
+Rules:
+- Return exactly 3 insights and 3 suggestions
+- Focus on overspending, savings opportunities, and budget health
+- Be concise and practical. Each string should be short and meaningful.
+- Do not include greetings or unnecessary text
+- Do not include markdown or text outside JSON
+`
+      },
+      {
+        role: "user",
+        content: `
+Analyze the following spending vs budget data per category.
+
+For each category:
+- Compare spent vs budget
+- Identify overspending or good budgeting behavior
+
+Data:
+${JSON.stringify(structuredData)}
+
+Return exactly:
+- 3 insights about spending behavior
+- 3 actionable suggestions to improve finances
+`
+      }
+    ];
 
     // Call AI
     const response = await openai.chat.completions.create({
       model: "gpt-4o-mini",
-      messages: [{ role: "user", content: prompt }]
+      messages
     });
 
-    const suggestions = response.choices[0].message.content;
+    let data;
 
-    res.json({ suggestions });
+    try {
+      data = JSON.parse(response.choices[0].message.content);
+    } catch (err) {
+      console.error("Invalid JSON:", response.choices[0].message.content);
 
-  }catch (err) {
-  console.error("AI Suggestions Error:", err);
-  res.status(500).json({ error: err.message });
-}
+      return res.status(500).json({
+        error: "AI did not return valid JSON"
+      });
+    }
+
+    res.json({
+      insights: data.insights,
+      suggestions: data.suggestions
+    });
+
+  } catch (err) {
+    console.error("AI Suggestions Error:", err);
+    res.status(500).json({ error: err.message });
+  }
 });
 
 module.exports = router;
