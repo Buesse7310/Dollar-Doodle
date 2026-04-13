@@ -11,7 +11,7 @@ A modern web application to track expenses, visualize spending habits, and achie
 - Scan receipts
 - Smart suggestions based on habits
 
-## Usage
+## Usage / Development
 
 ### 0. Install system dependencies
 
@@ -31,22 +31,34 @@ git clone https://github.com/Buesse7310/Dollar-Doodle.git
 cd Dollar-Doodle
 ```
 
-### 2. Install project dependencies
+### 2. Import database
+
+Import the latest database.sql (docs/phase3/database.sql) into the database program of your choice.
+
+### 3. Setup environment variables
+
+``` sh
+cp .env.example .env
+```
+
+Edit .env and fill in the necessary values.
+
+### 4. Install project dependencies
 
 ``` sh
 cd src/server
-npm install --omit=dev
+npm install
 ```
 
-### 3. Run server
+### 5. Run server
 
 ``` sh
-node server.js
+npx nodemon server.js
 ```
 
-### 4. Open the app
+### 6. Open the app
 
-Visit <http://localhost:5000> in your browser.
+The server is now running on <http://localhost:5000> and nodemon will automatically reload the server when you edit a file.
 
 ## Modules
 
@@ -78,86 +90,4 @@ Visit <http://localhost:5000> in your browser.
 | Nick Schott       | <ns285558@my.stchas.edu>  | Developer |
 | Daniel Austin     | <da281540@my.stchas.edu>  | Developer |
 
-## Development
-
-### 0. Install system dependencies
-
-[Git](https://git-scm.com) and [Node.js](https://nodejs.org) are required to run this project, meaning the following commands should run in your terminal without error:
-
-``` sh
-git -v
-npm -v
-```
-
-If there is an error when running either of the commands, then you need to install the related dependency.
-
-### 1. Clone the repository
-
-``` sh
-git clone https://github.com/Buesse7310/Dollar-Doodle.git
-cd Dollar-Doodle
-```
-
-### 2. Install project dependencies
-
-``` sh
-cd src/server
-npm install
-```
-
-### 3. Run server
-
-``` sh
-npx nodemon server.js
-```
-
-### 4. Make changes
-
-The server is now running on <http://localhost:5000> and nodemon will automatically reload the server when you edit a file.
-
-### 5. Team Setup Guide for Veryfi API
-
-```bash
-# 1. Clone the repository
-git clone https://github.com/Buesse717/Dollar-Doodle.git
-cd Dollar-Doodle
-
-# 2. Install dependencies
-npm install
-
-# 3. Copy template files
-cp .env.example .env
-cp .env.veryfi_api_key.example .env.veryfi_api_key
-
-# 4. Add your Veryfi API keys (get from https://hub.veryfi.com/)
-# Edit .env.veryfi_api_key with your credentials
-
-# 5. Add your MySQL password to .env
-# Edit .env and set DB_PASSWORD=your_password
-
-# 6. Start the server
-node server.js
-
-# 7. Open browser at http://localhost:5000/login.html
-
 > Because managing money shouldn't be a headache.
-
-
-### 6. OpenAI set up
-
-## 1. 
-
-cd src/server
-npm install
-npm install openai
-
-## 2.
-
-cd src/server
-node server.js
-
-## 3.
-
-http://localhost:5000/api/ai-suggestions/1
-
-
