@@ -18,25 +18,25 @@ router.use((req, res, next) => {
    ---------------------- */
 router.get("/", auth, async (req, res) => {
     try {
-        // Expenses - latest first
+        // Expenses - ordered by upload date (newest first)
         const [expenses] = await db.execute(
-            "SELECT e.Expense_ID AS id, e.Expense_Amount AS amount, e.Expense_Description AS description, e.Expense_date AS date, c.Category_Name AS category, 'expense' AS type " +
+            "SELECT e.Expense_ID AS id, e.Expense_Amount AS amount, e.Expense_Description AS description, e.Expense_date AS date, e.Exp_Created_At AS upload_date, c.Category_Name AS category, 'expense' AS type " +
             "FROM Expenses e JOIN Categories c ON e.Category_ID = c.Category_ID " +
             "WHERE e.User_ID = ? " +
-            "ORDER BY e.Expense_date DESC, e.Expense_ID DESC",
+            "ORDER BY e.Exp_Created_At DESC, e.Expense_ID DESC",
             [req.user.id]
         );
 
-        // Incomes - latest first
+        // Incomes - ordered by creation date (newest first)
         const [incomes] = await db.execute(
-            "SELECT i.Income_ID AS id, i.Income_Amount AS amount, i.Income_Source AS source, i.Income_Date AS date, i.Income_Repeating AS repeating, i.Income_Recurring_frequency AS frequency, 'income' AS type " +
+            "SELECT i.Income_ID AS id, i.Income_Amount AS amount, i.Income_Source AS source, i.Income_Date AS date, i.Income_Created_at AS upload_date, i.Income_Repeating AS repeating, i.Income_Recurring_frequency AS frequency, 'income' AS type " +
             "FROM Incomes i WHERE i.User_ID = ? " +
-            "ORDER BY i.Income_Date DESC, i.Income_ID DESC",
+            "ORDER BY i.Income_Created_at DESC, i.Income_ID DESC",
             [req.user.id]
         );
 
-        // Merge and sort by date descending
-        const transactions = [...expenses, ...incomes].sort((a, b) => new Date(b.date) - new Date(a.date));
+        // Merge and sort by upload date descending (newest first)
+        const transactions = [...expenses, ...incomes].sort((a, b) => new Date(b.upload_date) - new Date(a.upload_date));
 
         res.json(transactions);
     } catch (err) {

@@ -114,10 +114,21 @@ async function fetchTransactions() {
         const res = await authFetch("/api/transactions");
         if (!res) return;
 
-        userTransactions = await res.json();
+        const data = await res.json();
+        
+        // Check if the response is an array or an object with expenses/incomes
+        if (Array.isArray(data)) {
+            userTransactions = data;
+        } else {
+            // New format: { expenses: [...], incomes: [...] }
+            const expenses = data.expenses || [];
+            const incomes = data.incomes || [];
+            userTransactions = [...expenses, ...incomes];
+        }
+        
         renderTransactions();
     } catch (err) {
-        console.error(err);
+        console.error("Fetch transactions error:", err);
     }
 }
 
@@ -381,24 +392,24 @@ async function processReceipt(file) {
 
         if (result.success) {
             alert(`✅ Success! Saved ${result.lineItemsCount} items from your receipt.`);
-            location.reload();
+            await fetchTransactions();
+            loadingOverlay.style.display = 'none';
+            receiptInput.value = '';
         } else {
             alert('Failed to process receipt: ' + (result.error || 'Unknown error'));
+            if (loadingOverlay) {
+                loadingOverlay.style.display = 'none';
+            }
         }
 
     } catch (error) {
         console.error('Error:', error);
         alert('Failed to process receipt: ' + error.message);
-    } finally {
         if (loadingOverlay) {
             loadingOverlay.style.display = 'none';
         }
-        if (receiptInput) {
-            receiptInput.value = '';
-        }
     }
 }
-
 // ========== FEEDBACK FEATURE ==========
 
 const feedbackBtn = document.getElementById('feedback-btn');
