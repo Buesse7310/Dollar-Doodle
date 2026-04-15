@@ -176,8 +176,23 @@ function renderTransactions() {
             }
         };
 
+        const editBtn = document.createElement("button");
+        editBtn.textContent = "Edit";
+        editBtn.classList.add("edit-btn");
+        editBtn.style.backgroundColor = "#4CAF50";
+        editBtn.style.color = "white";
+        editBtn.style.border = "none";
+        editBtn.style.padding = "5px 10px";
+        editBtn.style.borderRadius = "5px";
+        editBtn.style.cursor = "pointer";
+        editBtn.style.marginRight = "5px";
+        editBtn.onclick = () => {
+            openEditModal(t);
+        };
+
         li.appendChild(leftDiv);
         li.appendChild(amountSpan);
+        li.appendChild(editBtn);
         li.appendChild(delBtn);
 
         transactionsList.appendChild(li);
@@ -341,8 +356,6 @@ if (receiptInput) {
     });
 }
 
-// ========== Updated Process Receipt Function to save data into receipt_line_itemas after scanning receipts ==========
-
 async function processReceipt(file) {
     if (!file) return;
 
@@ -385,9 +398,9 @@ async function processReceipt(file) {
         }
     }
 }
+
 // ========== FEEDBACK FEATURE ==========
 
-// Open modal
 const feedbackBtn = document.getElementById('feedback-btn');
 if (feedbackBtn) {
     feedbackBtn.onclick = function () {
@@ -396,7 +409,6 @@ if (feedbackBtn) {
     };
 }
 
-// Close modal
 const closeFeedbackBtn = document.querySelector('.close-feedback-btn');
 if (closeFeedbackBtn) {
     closeFeedbackBtn.onclick = function () {
@@ -404,7 +416,6 @@ if (closeFeedbackBtn) {
     };
 }
 
-// Submit form
 const feedbackForm = document.getElementById('feedback-form');
 if (feedbackForm) {
     feedbackForm.onsubmit = async function (e) {
@@ -445,7 +456,6 @@ if (feedbackForm) {
 // AI state (prevents spam clicks)
 let aiLoadingState = false;
 
-// AI data renderer
 function renderAI(data) {
     const insights = data?.insights || [];
     const suggestions = data?.suggestions || [];
@@ -455,14 +465,12 @@ function renderAI(data) {
         return;
     }
 
-    // insights
     insights.forEach(text => {
         const li = document.createElement("li");
         li.textContent = text;
         aiInsightsList.appendChild(li);
     });
 
-    // suggestions
     suggestions.forEach(text => {
         const li = document.createElement("li");
         li.textContent = text;
@@ -470,14 +478,12 @@ function renderAI(data) {
     });
 }
 
-// AI button
 aiBtn.addEventListener("click", async () => {
-    if (aiLoadingState) return; // prevents spam clicks
+    if (aiLoadingState) return;
     aiLoadingState = true;
 
     aiModal.style.display = "flex";
 
-    // reset UI
     aiInsightsList.innerHTML = "";
     aiSuggestionsList.innerHTML = "";
     aiError.style.display = "none";
@@ -503,7 +509,6 @@ aiBtn.addEventListener("click", async () => {
 
     } catch (err) {
         console.error("AI error:", err);
-
         aiError.textContent = "⚠️ Failed to load AI insights. Please try again.";
         aiError.style.display = "block";
 
@@ -513,7 +518,6 @@ aiBtn.addEventListener("click", async () => {
     }
 });
 
-// close modal
 closeAiModal.addEventListener("click", () => {
     aiModal.style.display = "none";
 });
@@ -523,3 +527,218 @@ closeAiModal.addEventListener("click", () => {
 // ------------------------
 fetchDropdowns();
 fetchTransactions();
+
+// ========== EDIT EXPENSE & INCOME FEATURE ==========
+
+const editModalHTML = `
+<div id="edit-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1003; justify-content: center; align-items: center;">
+    <div style="background: white; padding: 25px; border-radius: 10px; width: 90%; max-width: 500px;">
+        <span class="close-edit-modal" style="float: right; cursor: pointer; font-size: 24px;">&times;</span>
+        <h3 id="edit-modal-title">Edit Transaction</h3>
+        <form id="edit-form">
+            <input type="hidden" id="edit-id">
+            <input type="hidden" id="edit-type">
+            
+            <div id="edit-expense-fields">
+                <label>Description:</label>
+                <input type="text" id="edit-description" style="width: 100%; padding: 10px; margin: 10px 0;">
+                
+                <label>Category:</label>
+                <select id="edit-category" style="width: 100%; padding: 10px; margin: 10px 0;"></select>
+            </div>
+            
+            <div id="edit-income-fields" style="display: none;">
+                <label>Source:</label>
+                <select id="edit-source" style="width: 100%; padding: 10px; margin: 10px 0;">
+                    <option value="Salary">Salary</option>
+                    <option value="Wages">Wages</option>
+                    <option value="Self-Employed">Self-Employed</option>
+                    <option value="Business">Business</option>
+                    <option value="Freelance">Freelance</option>
+                    <option value="Investment">Investment</option>
+                    <option value="Rental Income">Rental Income</option>
+                    <option value="Lottery">Lottery</option>
+                    <option value="Interest">Interest</option>
+                    <option value="Bonus">Bonus</option>
+                    <option value="Commission">Commission</option>
+                    <option value="Tips">Tips</option>
+                    <option value="Gift">Gift</option>
+                    <option value="Refund">Refund</option>
+                    <option value="Reimbursement">Reimbursement</option>
+                    <option value="Government Benefits">Government Benefits</option>
+                    <option value="Unemployment">Unemployment</option>
+                    <option value="Child Support">Child Support</option>
+                    <option value="Pension">Pension</option>
+                    <option value="Social Security">Social Security</option>
+                    <option value="Scholarship">Scholarship</option>
+                    <option value="Student Loan">Student Loan</option>
+                    <option value="Side Hustle">Side Hustle</option>
+                    <option value="Other">Other</option>
+                </select>
+                
+                <label>Repeating:</label>
+                <select id="edit-repeating" style="width: 100%; padding: 10px; margin: 10px 0;">
+                    <option value="false">No</option>
+                    <option value="true">Yes</option>
+                </select>
+                
+                <label>Frequency:</label>
+                <select id="edit-frequency" style="width: 100%; padding: 10px; margin: 10px 0;">
+                    <option value="weekly">Weekly</option>
+                    <option value="biweekly">Bi-weekly</option>
+                    <option value="monthly">Monthly</option>
+                    <option value="yearly">Yearly</option>
+                </select>
+            </div>
+            
+            <label>Amount ($):</label>
+            <input type="number" id="edit-amount" step="0.01" required style="width: 100%; padding: 10px; margin: 10px 0;">
+            
+            <label>Date:</label>
+            <input type="date" id="edit-date" required style="width: 100%; padding: 10px; margin: 10px 0;">
+            
+            <button type="submit" style="background-color: #4CAF50; color: white; padding: 10px; border: none; border-radius: 5px; cursor: pointer; width: 100%;">Update Transaction</button>
+        </form>
+    </div>
+</div>
+`;
+
+if (!document.getElementById('edit-modal')) {
+    document.body.insertAdjacentHTML('beforeend', editModalHTML);
+}
+
+const editModal = document.getElementById('edit-modal');
+const closeEditModal = document.querySelector('.close-edit-modal');
+const editForm = document.getElementById('edit-form');
+const editRepeating = document.getElementById('edit-repeating');
+const editFrequency = document.getElementById('edit-frequency');
+
+if (editRepeating) {
+    editRepeating.addEventListener('change', function() {
+        editFrequency.disabled = this.value !== 'true';
+    });
+}
+
+async function openEditModal(transaction) {
+    document.getElementById('edit-id').value = transaction.id;
+    document.getElementById('edit-type').value = transaction.type;
+    document.getElementById('edit-amount').value = transaction.amount;
+    document.getElementById('edit-date').value = transaction.date;
+    
+    if (transaction.type === 'expense') {
+        document.getElementById('edit-modal-title').textContent = 'Edit Expense';
+        document.getElementById('edit-expense-fields').style.display = 'block';
+        document.getElementById('edit-income-fields').style.display = 'none';
+        document.getElementById('edit-description').value = transaction.description || '';
+        
+        const res = await authFetch('/api/db-lookup');
+        const data = await res.json();
+        const categorySelect = document.getElementById('edit-category');
+        categorySelect.innerHTML = '';
+        data.categories.forEach(cat => {
+            const option = document.createElement('option');
+            option.value = cat.Category_ID;
+            option.textContent = cat.Category_Name;
+            if (cat.Category_Name === transaction.category) {
+                option.selected = true;
+            }
+            categorySelect.appendChild(option);
+        });
+    } else {
+        document.getElementById('edit-modal-title').textContent = 'Edit Income';
+        document.getElementById('edit-expense-fields').style.display = 'none';
+        document.getElementById('edit-income-fields').style.display = 'block';
+        
+        const sourceSelect = document.getElementById('edit-source');
+        if (sourceSelect) {
+            sourceSelect.value = transaction.source || 'Salary';
+        }
+        
+        document.getElementById('edit-repeating').value = transaction.repeating ? 'true' : 'false';
+        document.getElementById('edit-frequency').value = transaction.frequency || 'monthly';
+        
+        if (editFrequency) {
+            editFrequency.disabled = !transaction.repeating;
+        }
+    }
+    
+    editModal.style.display = 'flex';
+}
+
+if (closeEditModal) {
+    closeEditModal.onclick = function() {
+        editModal.style.display = 'none';
+    }
+}
+
+window.onclick = function(e) {
+    if (e.target === editModal) {
+        editModal.style.display = 'none';
+    }
+}
+
+if (editForm) {
+    editForm.onsubmit = async function(e) {
+        e.preventDefault();
+        
+        const id = document.getElementById('edit-id').value;
+        const type = document.getElementById('edit-type').value;
+        let amount = document.getElementById('edit-amount').value;
+        const date = document.getElementById('edit-date').value;
+        
+        const token = localStorage.getItem('token');
+        let response;
+        
+        if (type === 'expense') {
+            const description = document.getElementById('edit-description').value;
+            const categoryId = document.getElementById('edit-category').value;
+            
+            response = await fetch(`http://localhost:5000/api/transactions/expense/${id}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + token
+                },
+                body: JSON.stringify({
+                    description: description,
+                    amount: parseFloat(amount),
+                    date: date,
+                    categoryId: categoryId
+                })
+            });
+        } else {
+            const source = document.getElementById('edit-source').value;
+            const repeating = document.getElementById('edit-repeating').value === 'true';
+            let frequency = document.getElementById('edit-frequency').value;
+            
+            if (!repeating) {
+                frequency = null;
+            }
+            
+            response = await fetch(`http://localhost:5000/api/transactions/income/${id}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + token
+                },
+                body: JSON.stringify({
+                    amount: parseFloat(amount),
+                    source: source,
+                    date: date,
+                    repeating: repeating,
+                    frequency: frequency
+                })
+            });
+        }
+        
+        const result = await response.json();
+        
+        if (response.ok) {
+            alert('Transaction updated successfully!');
+            editModal.style.display = 'none';
+            fetchTransactions();
+        } else {
+            alert('Failed to update transaction: ' + (result.error || 'Unknown error'));
+        }
+    }
+}
