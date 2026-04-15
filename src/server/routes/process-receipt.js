@@ -47,6 +47,13 @@ router.post("/", upload.single('receipt'), async (req, res) => {
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
         const userId = decoded.id;
         
+        // Get categories from database
+        const [categories] = await db.query('SELECT Category_ID, Category_Name FROM categories');
+        const categoryMap = {};
+        categories.forEach(cat => {
+            categoryMap[cat.Category_Name.toLowerCase()] = cat.Category_ID;
+        });
+        
         // 1. Save to receipts table
         const imageUrl = `/uploads/receipts/${Date.now()}.jpg`;
         
@@ -68,33 +75,46 @@ router.post("/", upload.single('receipt'), async (req, res) => {
             const itemQuantity = item.quantity || 1;
             const itemUnitPrice = item.price || (itemTotal / itemQuantity) || 0;
             
+            // Determine category based on Veryfi's suggestion
+            const veryfiCategory = (item.category || '').toLowerCase();
+            let categoryId = categoryMap['other'] || 12; // Default to 'Other'
+            let categoryName = 'Other';
+            
+            if (veryfiCategory && categoryMap[veryfiCategory]) {
+                categoryId = categoryMap[veryfiCategory];
+                const matchedCat = categories.find(c => c.Category_Name.toLowerCase() === veryfiCategory);
+                categoryName = matchedCat ? matchedCat.Category_Name : 'Other';
+            }
+            
             // Save to receipt_line_items
             await db.query(
                 `INSERT INTO receipt_line_items 
-                 (Receipt_ID, User_ID, description, quantity, unit_price, total_price, category_name, veryfi_category)
-                 VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+                 (Receipt_ID, User_ID, description, quantity, unit_price, total_price, category_id, category_name, veryfi_category)
+                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
                 [
                     receiptId, userId,
                     item.description || 'Unknown',
                     itemQuantity,
                     itemUnitPrice,
                     itemTotal,
-                    item.category || 'Uncategorized',
+                    categoryId,
+                    categoryName,
                     item.category || null
                 ]
             );
             
-            // Save to expenses (so it appears on dashboard)
+            // Save to expenses table with image URL
             await db.query(
-                `INSERT INTO expenses (User_ID, Expense_Amount, Category_ID, Expense_Description, Expense_date, Receipt_ID)
-                 VALUES (?, ?, ?, ?, ?, ?)`,
+                `INSERT INTO expenses (User_ID, Expense_Amount, Category_ID, Expense_Description, Expense_date, Receipt_ID, Receipt_Image_url)
+                 VALUES (?, ?, ?, ?, ?, ?, ?)`,
                 [
                     userId,
                     itemTotal,
-                    12,  // Default to category ID 12 (Other)
+                    categoryId,
                     item.description || 'Unknown',
                     receiptData.date || new Date(),
-                    receiptId
+                    receiptId,
+                    imageUrl
                 ]
             );
             
