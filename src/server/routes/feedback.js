@@ -7,7 +7,7 @@ router.post("/", auth, async (req, res) => {
     console.log("📝 Feedback endpoint called");
 
     try {
-        // Your JWT payload contains { id: ... }
+        //  JWT payload contains { id: ... }
         const userId = req.user.id;
 
         if (!userId) {

@@ -28,7 +28,7 @@ router.post("/", async (req, res) => {
             let categoryId = null;
             let categoryName = 'Other';
 
-            // Simple matching logic based on your receipt items
+            // Simple matching logic based on receipt items
             if (description.includes('cola') || description.includes('chip') || description.includes('snack') ||
                 description.includes('food') || description.includes('drink') || description.includes('soda')) {
                 const cat = categories.find(c => c.Category_Name === 'Food & Dining');

@@ -54,6 +54,74 @@ router.post("/", upload.single('receipt'), async (req, res) => {
             categoryMap[cat.Category_Name.toLowerCase()] = cat.Category_ID;
         });
         
+        // MAPPING from Veryfi categories to table categories
+        const veryfiToYourCategory = {
+            'Groceries': 'Food & Dining',
+            'Restaurants': 'Food & Dining',
+            'Fast Food': 'Food & Dining',
+            'Coffee Shop': 'Food & Dining',
+            'Coffee': 'Food & Dining',
+            'Bakery': 'Food & Dining',
+            'Clothing': 'Shopping',
+            'Apparel': 'Shopping',
+            'Shoes': 'Shopping',
+            'Electronics': 'Shopping',
+            'Department Store': 'Shopping',
+            'Gas': 'Transportation',
+            'Fuel': 'Transportation',
+            'Gas Station': 'Transportation',
+            'Uber': 'Transportation',
+            'Lyft': 'Transportation',
+            'Taxi': 'Transportation',
+            'Parking': 'Transportation',
+            'Medical': 'Healthcare',
+            'Pharmacy': 'Healthcare',
+            'Doctor': 'Healthcare',
+            'Hospital': 'Healthcare',
+            'Dentist': 'Healthcare',
+            'Entertainment': 'Entertainment',
+            'Movies': 'Entertainment',
+            'Cinema': 'Entertainment',
+            'Concert': 'Entertainment',
+            'Utilities': 'Bills & Utilities',
+            'Electric': 'Bills & Utilities',
+            'Water': 'Bills & Utilities',
+            'Internet': 'Bills & Utilities',
+            'Phone': 'Bills & Utilities',
+            'Rent': 'Housing',
+            'Mortgage': 'Housing',
+            'Travel': 'Travel',
+            'Flight': 'Travel',
+            'Hotel': 'Travel',
+            'Education': 'Education',
+            'Tuition': 'Education',
+            'Books': 'Education',
+            'Personal Care': 'Personal Care',
+            'Haircut': 'Personal Care',
+            'Salon': 'Personal Care',
+            'Spa': 'Personal Care',
+            'Pets': 'Pets',
+            'Pet Food': 'Pets',
+            'Veterinary': 'Pets',
+            'Home Improvement': 'Housing',
+            'Hardware': 'Shopping'
+        };
+        
+        // Keyword mapping for items without Veryfi category
+        const keywordToCategory = {
+            'Food & Dining': ['avocado', 'potato', 'tofu', 'olive', 'cheese', 'milk', 'bread', 'egg', 'meat', 'chicken', 'beef', 'pork', 'fish', 'fruit', 'vegetable', 'salad', 'soup', 'pizza', 'burger', 'pasta', 'rice', 'bean', 'corn', 'tomato', 'onion', 'garlic', 'carrot', 'lettuce', 'spinach', 'broccoli', 'apple', 'banana', 'orange', 'grape', 'berry', 'yogurt', 'butter', 'cream', 'sauce', 'oil', 'snack', 'chip', 'candy', 'chocolate', 'cookie', 'cake', 'bread'],
+            'Shopping': ['shirt', 'pant', 'shoe', 'sock', 'dress', 'jacket', 'hat', 'belt', 'bag', 'wallet', 'watch', 'jewelry', 'toy', 'game', 'book', 'pen', 'paper', 'tape', 'glue', 'battery', 'light', 'lamp'],
+            'Healthcare': ['medicine', 'pill', 'vitamin', 'bandage', 'cream', 'lotion', 'soap', 'shampoo', 'toothpaste', 'brush', 'mask', 'glove', 'earplug'],
+            'Transportation': ['gas', 'fuel', 'tire', 'oil change', 'repair', 'parking', 'toll'],
+            'Bills & Utilities': ['electric', 'water', 'gas bill', 'internet', 'phone', 'utility'],
+            'Housing': ['rent', 'mortgage', 'furniture', 'table', 'chair', 'bed', 'sofa', 'desk', 'lamp', 'rug', 'curtain'],
+            'Entertainment': ['movie', 'netflix', 'spotify', 'game', 'concert', 'ticket', 'show'],
+            'Travel': ['hotel', 'flight', 'airline', 'vacation', 'trip', 'luggage'],
+            'Education': ['book', 'tuition', 'course', 'school', 'college', 'class', 'notebook'],
+            'Personal Care': ['haircut', 'salon', 'spa', 'massage', 'nail', 'barber', 'cosmetic', 'makeup'],
+            'Pets': ['dog', 'cat', 'pet', 'food pet', 'toy pet', 'leash', 'collar', 'bed pet']
+        };
+        
         // 1. Save to receipts table
         const imageUrl = `/uploads/receipts/${Date.now()}.jpg`;
         
@@ -74,17 +142,48 @@ router.post("/", upload.single('receipt'), async (req, res) => {
             const itemTotal = item.total || item.price || 0;
             const itemQuantity = item.quantity || 1;
             const itemUnitPrice = item.price || (itemTotal / itemQuantity) || 0;
+            const itemDescription = (item.description || '').toLowerCase();
             
-            // Determine category based on Veryfi's suggestion
-            const veryfiCategory = (item.category || '').toLowerCase();
-            let categoryId = categoryMap['other'] || 12; // Default to 'Other'
-            let categoryName = 'Other';
+            // Try to get category from Veryfi first
+            let veryfiCategoryName = item.category || '';
+            let yourCategoryName = '';
             
-            if (veryfiCategory && categoryMap[veryfiCategory]) {
-                categoryId = categoryMap[veryfiCategory];
-                const matchedCat = categories.find(c => c.Category_Name.toLowerCase() === veryfiCategory);
-                categoryName = matchedCat ? matchedCat.Category_Name : 'Other';
+            // If Veryfi has a category, try to map it
+            if (veryfiCategoryName && veryfiToYourCategory[veryfiCategoryName]) {
+                yourCategoryName = veryfiToYourCategory[veryfiCategoryName];
+                console.log(`📌 Veryfi category found: "${veryfiCategoryName}" → mapped to "${yourCategoryName}"`);
+            } else {
+                // No Veryfi category, try keyword matching
+                for (const [category, keywords] of Object.entries(keywordToCategory)) {
+                    for (const keyword of keywords) {
+                        if (itemDescription.includes(keyword)) {
+                            yourCategoryName = category;
+                            console.log(`🔍 Keyword match: "${item.description}" contains "${keyword}" → "${category}"`);
+                            break;
+                        }
+                    }
+                    if (yourCategoryName) break;
+                }
             }
+            
+            // If still no category, use 'Other'
+            if (!yourCategoryName) {
+                yourCategoryName = 'Other';
+                console.log(`❌ No match for "${item.description}" → Using "Other"`);
+            }
+            
+            // Get category ID from the database
+            let categoryId = categoryMap[yourCategoryName.toLowerCase()];
+            let categoryName = yourCategoryName;
+            
+            // If category not found in database, use 'Other'
+            if (!categoryId) {
+                categoryId = categoryMap['other'] || 12;
+                categoryName = 'Other';
+                console.log(`⚠️ Category "${yourCategoryName}" not found in DB. Using "Other"`);
+            }
+            
+            console.log(`✅ Final: "${item.description}" → Category: "${categoryName}" (ID: ${categoryId})`);
             
             // Save to receipt_line_items
             await db.query(
@@ -103,7 +202,7 @@ router.post("/", upload.single('receipt'), async (req, res) => {
                 ]
             );
             
-            // Save to expenses table with image URL
+            // Save to expenses table
             await db.query(
                 `INSERT INTO expenses (User_ID, Expense_Amount, Category_ID, Expense_Description, Expense_date, Receipt_ID, Receipt_Image_url)
                  VALUES (?, ?, ?, ?, ?, ?, ?)`,
@@ -112,7 +211,7 @@ router.post("/", upload.single('receipt'), async (req, res) => {
                     itemTotal,
                     categoryId,
                     item.description || 'Unknown',
-                    receiptData.date || new Date(),
+                    receiptData.date ? new Date(receiptData.date) : new Date(),
                     receiptId,
                     imageUrl
                 ]
@@ -121,7 +220,7 @@ router.post("/", upload.single('receipt'), async (req, res) => {
             savedItems++;
         }
         
-        console.log(`✅ Saved ${savedItems} items to receipt_line_items and expenses`);
+        console.log(`✅ Saved ${savedItems} items`);
         
         // Clean up temp file
         try { fs.unlinkSync(filePath); } catch(e) {}
