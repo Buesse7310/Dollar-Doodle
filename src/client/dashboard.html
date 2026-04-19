@@ -32,8 +32,13 @@
     <button id="add-expense-btn">Add Transaction</button>
 
     <!-- Receipt Upload -->
-    <button id="upload-receipt-btn">📷 Upload Receipt</button>
+    <button id="upload-receipt-btn" style="display: block; margin: 1rem auto; background-color: #1B3A6C; color: white; border: none; border-radius: 50px; padding: 0.6rem 1.5rem; font-weight: 600; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);">📷 Upload Receipt</button>
     <input type="file" id="receiptInput" accept="image/*,application/pdf" style="display: none;">
+
+    <!-- Disclaimer -->
+    <p style="text-align: center; font-size: 0.75rem; color: #888; margin-top: 5px; margin-bottom: 10px;">
+      ⚠️ Receipt image quality may affect scan accuracy. AI can make mistakes — please review and edit transactions if needed.
+    </p>
 
     <!-- Feedback Button (fixed) -->
     <button id="feedback-btn"
