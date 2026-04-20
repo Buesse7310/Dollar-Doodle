@@ -1,6 +1,19 @@
 /* =========================
    Base & Layout
    ========================= */
+
+#feedback-form select.feedback-select {
+  width: 100% !important;
+  padding: 6px 8px !important;
+  font-size: 0.8rem !important;
+  border: 1px solid #ccc !important;
+  border-radius: 4px !important;
+  display: block !important;
+  box-sizing: border-box !important;
+  height: auto !important;
+  line-height: normal !important;
+}
+
 * {
   margin: 0;
   padding: 0;
@@ -270,8 +283,15 @@ form select:focus {
    ========================= */
 #add-expense-form > div,
 #add-expense-form input,
-#add-expense-form select,
 #add-expense-form button {
+  width: 90%;
+  max-width: 300px;
+  margin: 0.5rem 0;
+  display: block;
+  text-align: center;
+}
+
+#add-expense-form select {
   width: 90%;
   max-width: 300px;
   margin: 0.5rem 0;
@@ -364,50 +384,53 @@ form select:focus {
 
 #feedback-modal .modal-content {
   background: white;
-  padding: 25px;
-  border-radius: 10px;
-  width: 90%;
-  max-width: 500px;
+  padding: 15px;
+  border-radius: 8px;
+  width: 280px;
+  max-width: 90%;
   position: relative;
 }
 
 .close-feedback-btn {
   position: absolute;
-  top: 10px;
-  right: 15px;
-  font-size: 24px;
+  top: 5px;
+  right: 10px;
+  font-size: 16px;
   cursor: pointer;
+}
+
+#feedback-modal h3 {
+  font-size: 0.9rem;
+  margin-bottom: 10px;
+  margin-top: 0;
 }
 
 #feedback-form {
   display: flex;
   flex-direction: column;
-  gap: 15px;
-  margin-top: 15px;
-}
-
-#feedback-type {
-  padding: 10px;
-  border: 1px solid #ccc;
-  border-radius: 8px;
-  font-size: 1rem;
+  gap: 8px;
+  margin-top: 5px;
 }
 
 #feedback-message {
-  padding: 10px;
+  padding: 6px 8px;
   border: 1px solid #ccc;
-  border-radius: 8px;
-  font-size: 1rem;
+  border-radius: 4px;
+  font-size: 0.8rem;
   resize: vertical;
+  width: 100%;
+  height: 60px;
 }
 
 #feedback-form button {
   background-color: #1B3A6C;
   color: white;
-  padding: 10px;
+  padding: 6px 12px;
   border: none;
-  border-radius: 8px;
+  border-radius: 4px;
   cursor: pointer;
+  font-size: 0.8rem;
+  width: 100%;
 }
 
 #feedback-form button:hover {
@@ -446,6 +469,17 @@ form select:focus {
     text-align: left;
     margin: 0.25rem 0;
   }
+}
 
-  
+/* =========================
+   FINAL FIX — normal-sized, slightly bigger dropdown
+   ========================= */
+#feedback-type.feedback-select {
+  padding: 10px 12px !important;
+  font-size: 5rem !important;
+  height: 42px !important;
+  line-height: 42px !important;
+  border-radius: 6px !important;
+  box-sizing: border-box !important;
+  flex: 0 0 auto !important;
 }
