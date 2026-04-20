@@ -116,11 +116,9 @@ async function fetchTransactions() {
 
         const data = await res.json();
         
-        // Check if the response is an array or an object with expenses/incomes
         if (Array.isArray(data)) {
             userTransactions = data;
         } else {
-            // New format: { expenses: [...], incomes: [...] }
             const expenses = data.expenses || [];
             const incomes = data.incomes || [];
             userTransactions = [...expenses, ...incomes];
@@ -190,13 +188,6 @@ function renderTransactions() {
         const editBtn = document.createElement("button");
         editBtn.textContent = "Edit";
         editBtn.classList.add("edit-btn");
-        editBtn.style.backgroundColor = "#4CAF50";
-        editBtn.style.color = "white";
-        editBtn.style.border = "none";
-        editBtn.style.padding = "5px 10px";
-        editBtn.style.borderRadius = "5px";
-        editBtn.style.cursor = "pointer";
-        editBtn.style.marginRight = "5px";
         editBtn.onclick = () => {
             openEditModal(t);
         };
@@ -410,6 +401,7 @@ async function processReceipt(file) {
         }
     }
 }
+
 // ========== FEEDBACK FEATURE ==========
 
 const feedbackBtn = document.getElementById('feedback-btn');

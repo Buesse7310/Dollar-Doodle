@@ -87,15 +87,13 @@ button {
 }
 
 #logout-btn,
-#clearBtn,
-button.delete-btn {
+#clearBtn {
   background-color: #d32f2f;
   color: #fff;
 }
 
 #logout-btn:hover,
-#clearBtn:hover,
-button.delete-btn:hover {
+#clearBtn:hover {
   background-color: #b71c1c;
 }
 
@@ -154,6 +152,7 @@ form select:focus {
 .transaction-item div {
   display: flex;
   flex-direction: column;
+  flex: 2;
 }
 
 .transaction-desc {
@@ -166,20 +165,52 @@ form select:focus {
 }
 
 .transaction-date {
-    font-size: 0.85rem;
-    color: #888;
+  font-size: 0.85rem;
+  color: #888;
 }
 
 .expense-amount {
   font-weight: bold;
-  margin: 0 1rem;
   min-width: 80px;
-  text-align: right;
+  text-align: center;
+  margin: 0 10px;
 }
 
-button.delete-btn {
-  font-size: 0.85rem;
-  padding: 0.3rem 0.8rem;
+/* Edit and Delete buttons */
+.edit-btn {
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  font-size: 0.80rem;
+  padding: 0.30rem 0.7rem;
+  border-radius: 5px;
+  cursor: pointer;
+  margin-left: 5px;
+  display: inline-block;
+  width: auto;
+  box-shadow: none;
+}
+
+.edit-btn:hover {
+  background-color: #45a049;
+}
+
+.delete-btn {
+  background-color: #d32f2f;
+  color: white;
+  border: none;
+  font-size: 0.80rem;
+  padding: 0.30rem 0.7rem;
+  border-radius: 5px;
+  cursor: pointer;
+  margin-left: 5px;
+  display: inline-block;
+  width: auto;
+  box-shadow: none;
+}
+
+.delete-btn:hover {
+  background-color: #b71c1c;
 }
 
 /* =========================
@@ -312,6 +343,78 @@ button.delete-btn {
 }
 
 /* =========================
+   Feedback Modal Styles
+   ========================= */
+#feedback-modal {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.5);
+  z-index: 1001;
+  justify-content: center;
+  align-items: center;
+}
+
+#feedback-modal.show {
+  display: flex;
+}
+
+#feedback-modal .modal-content {
+  background: white;
+  padding: 25px;
+  border-radius: 10px;
+  width: 90%;
+  max-width: 500px;
+  position: relative;
+}
+
+.close-feedback-btn {
+  position: absolute;
+  top: 10px;
+  right: 15px;
+  font-size: 24px;
+  cursor: pointer;
+}
+
+#feedback-form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  margin-top: 15px;
+}
+
+#feedback-type {
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 1rem;
+}
+
+#feedback-message {
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 1rem;
+  resize: vertical;
+}
+
+#feedback-form button {
+  background-color: #1B3A6C;
+  color: white;
+  padding: 10px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+#feedback-form button:hover {
+  background-color: #1F3E6C;
+}
+
+/* =========================
    Responsive
    ========================= */
 @media (max-width: 600px) {
@@ -344,95 +447,5 @@ button.delete-btn {
     margin: 0.25rem 0;
   }
 
-  button.delete-btn {
-    align-self: flex-end;
-    margin-top: 0.25rem;
-  }
-
-  /* =========================
-   Feedback Modal Styles
-   ========================= */
-#feedback-modal {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0,0,0,0.5);
-    z-index: 1001;
-    justify-content: center;
-    align-items: center;
-}
-
-#feedback-modal.show {
-    display: flex;
-}
-
-#feedback-modal .modal-content {
-    background: white;
-    padding: 25px;
-    border-radius: 10px;
-    width: 90%;
-    max-width: 500px;
-    position: relative;
-}
-
-.close-feedback-btn {
-    position: absolute;
-    top: 10px;
-    right: 15px;
-    font-size: 24px;
-    cursor: pointer;
-}
-
-#feedback-form {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-    margin-top: 15px;
-}
-
-#feedback-type {
-    padding: 10px;
-    border: 1px solid #ccc;
-    border-radius: 8px;
-    font-size: 1rem;
-}
-
-#feedback-message {
-    padding: 10px;
-    border: 1px solid #ccc;
-    border-radius: 8px;
-    font-size: 1rem;
-    resize: vertical;
-}
-
-#feedback-form button {
-    background-color: #1B3A6C;
-    color: white;
-    padding: 10px;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-}
-
-#feedback-form button:hover {
-    background-color: #1F3E6C;
-}
-
-.edit-btn {
-    background-color: #4CAF50;
-    color: white;
-    border: none;
-    padding: 5px 10px;
-    border-radius: 5px;
-    cursor: pointer;
-    margin-right: 5px;
-}
-
-.edit-btn:hover {
-    background-color: #45a049;
-}
-
+  
 }
