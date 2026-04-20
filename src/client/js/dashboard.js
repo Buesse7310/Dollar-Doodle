@@ -623,10 +623,28 @@ if (editRepeating) {
 }
 
 async function openEditModal(transaction) {
+    console.log("Opening edit modal for:", transaction);
+    
     document.getElementById('edit-id').value = transaction.id;
     document.getElementById('edit-type').value = transaction.type;
     document.getElementById('edit-amount').value = transaction.amount;
-    document.getElementById('edit-date').value = transaction.date;
+    
+    // Fix the date format for the date input
+    let formattedDate = "";
+    if (transaction.date) {
+        // Check if date is already in YYYY-MM-DD format
+        if (typeof transaction.date === 'string' && transaction.date.match(/^\d{4}-\d{2}-\d{2}$/)) {
+            formattedDate = transaction.date;
+        } else {
+            // Convert to Date object and format
+            const dateObj = new Date(transaction.date);
+            if (!isNaN(dateObj.getTime())) {
+                formattedDate = dateObj.toISOString().split('T')[0];
+            }
+        }
+    }
+    document.getElementById('edit-date').value = formattedDate;
+    console.log("Date set to:", formattedDate);
     
     if (transaction.type === 'expense') {
         document.getElementById('edit-modal-title').textContent = 'Edit Expense';
