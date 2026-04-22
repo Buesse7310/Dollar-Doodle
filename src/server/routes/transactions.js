@@ -82,6 +82,7 @@ router.post("/", auth, async (req, res) => {
 /* ----------------------
    DELETE expense by ID
    ---------------------- */
+// DELETE expense by ID
 router.delete("/expense/:id", auth, async (req, res) => {
     const { id } = req.params;
 
@@ -99,9 +100,7 @@ router.delete("/expense/:id", auth, async (req, res) => {
     }
 });
 
-/* ----------------------
-   DELETE income by ID
-   ---------------------- */
+// DELETE income by ID
 router.delete("/income/:id", auth, async (req, res) => {
     const { id } = req.params;
 

@@ -40,7 +40,7 @@
       ⚠️ Receipt image quality may affect scan accuracy. AI can make mistakes — please review and edit transactions if needed.
     </p>
 
-    <!-- Feedback Button (fixed) -->
+    <!-- Feedback Button -->
     <button id="feedback-btn"
       style="position: fixed; bottom: 20px; left: 20px; background-color: #1B3A6C; color: white; padding: 10px 20px; border: none; border-radius: 50px; cursor: pointer;">
       💬 Send Feedback
@@ -108,7 +108,24 @@
       </div>
     </div>
 
-    <h3>Transactions</h3>
+    <!-- Transactions Header with Filters -->
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap;">
+      <h3 style="margin-bottom: 0;">Transactions</h3>
+      <div style="display: flex; gap: 10px; align-items: center;">
+        <select id="vendor-filter" style="padding: 5px 10px; border-radius: 5px; border: 1px solid #ccc; font-size: 0.8rem;">
+          <option value="all">All Vendors</option>
+        </select>
+        <select id="date-filter" style="padding: 5px 10px; border-radius: 5px; border: 1px solid #ccc; font-size: 0.8rem;">
+          <option value="all">All Dates</option>
+          <option value="today">Today</option>
+          <option value="week">This Week</option>
+          <option value="month">This Month</option>
+          <option value="year">This Year</option>
+        </select>
+        <button id="clear-filters-btn" style="background-color: #6c757d; color: white; padding: 5px 12px; border-radius: 5px; border: none; cursor: pointer; font-size: 0.8rem;">Clear</button>
+      </div>
+    </div>
+
     <ul id="transactions"></ul>
 
     <button id="clearBtn">Clear All</button>
@@ -182,7 +199,7 @@
 
 </body>
 
-<!-- ⭐ SCRIPT MUST BE HERE — ONLY HERE -->
+
 <script src="js/dashboard.js"></script>
 
 </html>
