@@ -1,4 +1,4 @@
-// ------------------------
+renderTransactions// ------------------------
 // Auth Fetch Helper
 // ------------------------
 async function authFetch(url, options = {}) {
@@ -142,6 +142,7 @@ function renderTransactions() {
         placeholder.style.textAlign = "center";
         placeholder.style.marginBottom = "1rem";
         transactionsList.appendChild(placeholder);
+        return;
     }
 
     let total = 0;
@@ -149,11 +150,24 @@ function renderTransactions() {
     userTransactions.forEach(t => {
         const li = document.createElement("li");
         li.classList.add("transaction-item");
+        li.setAttribute("data-id", t.id);
+        li.setAttribute("data-type", t.type);
 
+        // Checkbox on the left
+        const checkbox = document.createElement("input");
+        checkbox.type = "checkbox";
+        checkbox.classList.add("transaction-checkbox");
+        checkbox.style.marginRight = "10px";
+        checkbox.style.transform = "scale(1.1)";
+        checkbox.style.cursor = "pointer";
+
+        // Left side: description, category, date
+        const leftDiv = document.createElement("div");
+        
         const descSpan = document.createElement("span");
         descSpan.classList.add("transaction-desc");
         descSpan.textContent = t.type === "expense" ? t.description || "(No description)" : t.source;
-
+        
         const typeSpan = document.createElement("span");
         typeSpan.classList.add("transaction-category");
         typeSpan.textContent = t.type === "expense"
@@ -161,21 +175,33 @@ function renderTransactions() {
             : t.repeating
                 ? `Recurring (${t.frequency})`
                 : "One-time";
-
+        
         const dateSpan = document.createElement("span");
         dateSpan.classList.add("transaction-date");
         dateSpan.textContent = new Date(t.date).toLocaleDateString();
-
-        const leftDiv = document.createElement("div");
+        
         leftDiv.appendChild(descSpan);
         leftDiv.appendChild(typeSpan);
         leftDiv.appendChild(dateSpan);
 
+        // Center: amount
         const amountSpan = document.createElement("span");
         const amt = parseFloat(t.amount).toFixed(2);
         amountSpan.textContent = t.type === "expense" ? `-$${amt}` : `+$${amt}`;
+        amountSpan.classList.add("expense-amount");
         amountSpan.style.color = t.type === "expense" ? "#d32f2f" : "#357a38";
 
+        // Right side: buttons
+        const buttonDiv = document.createElement("div");
+        buttonDiv.classList.add("button-group");
+        
+        const editBtn = document.createElement("button");
+        editBtn.textContent = "Edit";
+        editBtn.classList.add("edit-btn");
+        editBtn.onclick = () => {
+            openEditModal(t);
+        };
+        
         const delBtn = document.createElement("button");
         delBtn.textContent = "Delete";
         delBtn.classList.add("delete-btn");
@@ -184,18 +210,15 @@ function renderTransactions() {
                 deleteTransaction(t.type, t.id);
             }
         };
+        
+        buttonDiv.appendChild(editBtn);
+        buttonDiv.appendChild(delBtn);
 
-        const editBtn = document.createElement("button");
-        editBtn.textContent = "Edit";
-        editBtn.classList.add("edit-btn");
-        editBtn.onclick = () => {
-            openEditModal(t);
-        };
-
+        // Assemble the row
+        li.appendChild(checkbox);
         li.appendChild(leftDiv);
         li.appendChild(amountSpan);
-        li.appendChild(editBtn);
-        li.appendChild(delBtn);
+        li.appendChild(buttonDiv);
 
         transactionsList.appendChild(li);
 

@@ -469,6 +469,13 @@ form select:focus {
     text-align: left;
     margin: 0.25rem 0;
   }
+
+  .transaction-checkbox {
+    margin-right: 10px;
+    transform: scale(1.1);
+    cursor: pointer;
+    flex-shrink: 0;
+  }
 }
 
 /* =========================
@@ -483,3 +490,37 @@ form select:focus {
   box-sizing: border-box !important;
   flex: 0 0 auto !important;
 }
+
+/* =========================
+   
+   ========================= */
+.transaction-actions {
+  display: flex !important;
+  gap: 6px !important;
+  flex-shrink: 0 !important;
+}
+
+.transaction-actions .edit-btn,
+.transaction-actions .delete-btn {
+  padding: 0.25rem 0.55rem !important;
+  font-size: 0.7rem !important;
+  border-radius: 4px !important;
+  width: auto !important;
+}
+/* FORCE small edit/delete buttons */
+.edit-btn,
+.delete-btn {
+  padding: 4px 8px !important;
+  font-size: 0.7rem !important;
+  border-radius: 4px !important;
+  box-shadow: none !important;
+  min-width: auto !important;
+  width: auto !important;
+}
+.button-group,
+.transaction-actions {
+  display: flex !important;
+  gap: 6px !important;
+  flex-shrink: 0 !important;
+}
+
