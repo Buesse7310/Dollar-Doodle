@@ -1,4 +1,15 @@
-renderTransactions// ------------------------
+// ------------------------
+// Variables
+// ------------------------
+let currentPage = 1;
+const itemsPerPage = 10;
+let filteredTransactions = [];
+let allTransactions = [];
+let currentVendorFilter = "all";
+let currentDateFilter = "all";
+let receiptsData = [];
+
+// ------------------------
 // Auth Fetch Helper
 // ------------------------
 async function authFetch(url, options = {}) {
@@ -63,8 +74,6 @@ const incomeFrequencySelect = document.getElementById("income-frequency");
 
 const logoutBtn = document.getElementById("logout-btn");
 
-let userTransactions = [];
-
 // ------------------------
 // Fetch dropdown data
 // ------------------------
@@ -107,6 +116,52 @@ async function fetchDropdowns() {
 }
 
 // ------------------------
+// Fetch receipts to get vendor names
+// ------------------------
+async function fetchReceipts() {
+    try {
+        const token = localStorage.getItem('token');
+        const response = await fetch('http://localhost:5000/api/receipts', {
+            headers: {
+                'Authorization': 'Bearer ' + token
+            }
+        });
+        
+        if (!response.ok) {
+            console.error('Failed to fetch receipts:', response.status);
+            return;
+        }
+        
+        const vendors = await response.json();
+        console.log('Vendors loaded from receipts:', vendors);
+        populateVendorFilter(vendors);
+    } catch (err) {
+        console.error("Fetch receipts error:", err);
+    }
+}
+
+// ------------------------
+// Populate vendor dropdown from receipt vendor_name (unique)
+// ------------------------
+function populateVendorFilter(vendors) {
+    const vendorSelect = document.getElementById('vendor-filter');
+    if (!vendorSelect) return;
+    
+    if (!vendors || vendors.length === 0) {
+        vendorSelect.innerHTML = '<option value="all">All Vendors</option>';
+        return;
+    }
+    
+    vendorSelect.innerHTML = '<option value="all">All Vendors</option>';
+    vendors.forEach(vendor => {
+        const option = document.createElement('option');
+        option.value = vendor.vendor_name;
+        option.textContent = vendor.vendor_name;
+        vendorSelect.appendChild(option);
+    });
+}
+
+// ------------------------
 // Fetch transactions
 // ------------------------
 async function fetchTransactions() {
@@ -117,16 +172,147 @@ async function fetchTransactions() {
         const data = await res.json();
         
         if (Array.isArray(data)) {
-            userTransactions = data;
+            allTransactions = data;
         } else {
             const expenses = data.expenses || [];
             const incomes = data.incomes || [];
-            userTransactions = [...expenses, ...incomes];
+            allTransactions = [...expenses, ...incomes];
         }
         
-        renderTransactions();
+        applyFilters();
     } catch (err) {
         console.error("Fetch transactions error:", err);
+    }
+}
+// ------------------------
+// Filter functions
+// ------------------------
+function filterByVendor(transaction) {
+    if (currentVendorFilter === 'all') return true;
+    
+    // For expenses, check if the description matches the selected vendor
+    if (transaction.type === 'expense') {
+        return transaction.description === currentVendorFilter;
+    }
+    return false;
+}
+
+function filterByDate(transaction, filterType) {
+    let transactionDate = new Date(transaction.date);
+    
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    const startOfWeek = new Date(today);
+    startOfWeek.setDate(today.getDate() - today.getDay());
+    
+    const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+    
+    const startOfYear = new Date(today.getFullYear(), 0, 1);
+    
+    switch(filterType) {
+        case 'today':
+            return transactionDate.toDateString() === today.toDateString();
+        case 'week':
+            return transactionDate >= startOfWeek;
+        case 'month':
+            return transactionDate >= startOfMonth;
+        case 'year':
+            return transactionDate >= startOfYear;
+        default:
+            return true;
+    }
+}
+
+function applyFilters() {
+    let filtered = [...allTransactions];
+    
+    if (currentVendorFilter !== 'all') {
+        filtered = filtered.filter(t => filterByVendor(t));
+    }
+    
+    if (currentDateFilter !== 'all') {
+        filtered = filtered.filter(t => filterByDate(t, currentDateFilter));
+    }
+    
+    filteredTransactions = filtered;
+    currentPage = 1;
+    renderTransactions();
+    updatePaginationControls();
+}
+
+function setupFilters() {
+    const vendorFilter = document.getElementById('vendor-filter');
+    const dateFilter = document.getElementById('date-filter');
+    const clearFiltersBtn = document.getElementById('clear-filters-btn');
+    
+    if (vendorFilter) {
+        vendorFilter.addEventListener('change', (e) => {
+            currentVendorFilter = e.target.value;
+            applyFilters();
+        });
+    }
+    
+    if (dateFilter) {
+        dateFilter.addEventListener('change', (e) => {
+            currentDateFilter = e.target.value;
+            applyFilters();
+        });
+    }
+    
+    if (clearFiltersBtn) {
+        clearFiltersBtn.addEventListener('click', () => {
+            currentVendorFilter = 'all';
+            currentDateFilter = 'all';
+            if (vendorFilter) vendorFilter.value = 'all';
+            if (dateFilter) dateFilter.value = 'all';
+            applyFilters();
+        });
+    }
+}
+
+// ------------------------
+// Pagination functions
+// ------------------------
+function updatePaginationControls() {
+    const totalPages = Math.ceil(filteredTransactions.length / itemsPerPage);
+    const pageInfo = document.getElementById('page-info');
+    const prevBtn = document.getElementById('prev-page-btn');
+    const nextBtn = document.getElementById('next-page-btn');
+    
+    if (pageInfo) {
+        pageInfo.textContent = `Page ${currentPage} of ${totalPages || 1}`;
+    }
+    
+    if (prevBtn) {
+        prevBtn.disabled = currentPage === 1;
+        prevBtn.style.opacity = currentPage === 1 ? '0.5' : '1';
+        prevBtn.style.cursor = currentPage === 1 ? 'not-allowed' : 'pointer';
+    }
+    
+    if (nextBtn) {
+        nextBtn.disabled = currentPage === totalPages || totalPages === 0;
+        nextBtn.style.opacity = (currentPage === totalPages || totalPages === 0) ? '0.5' : '1';
+        nextBtn.style.cursor = (currentPage === totalPages || totalPages === 0) ? 'not-allowed' : 'pointer';
+    }
+}
+
+function goToPrevPage() {
+    if (currentPage > 1) {
+        currentPage--;
+        renderTransactions();
+        updatePaginationControls();
+        document.getElementById('transactions').scrollIntoView({ behavior: 'smooth' });
+    }
+}
+
+function goToNextPage() {
+    const totalPages = Math.ceil(filteredTransactions.length / itemsPerPage);
+    if (currentPage < totalPages) {
+        currentPage++;
+        renderTransactions();
+        updatePaginationControls();
+        document.getElementById('transactions').scrollIntoView({ behavior: 'smooth' });
     }
 }
 
@@ -136,24 +322,31 @@ async function fetchTransactions() {
 function renderTransactions() {
     transactionsList.innerHTML = "";
 
-    if (userTransactions.length === 0) {
+    if (filteredTransactions.length === 0) {
         const placeholder = document.createElement("p");
         placeholder.textContent = "No transactions yet. Click 'Add Transaction' to get started.";
         placeholder.style.textAlign = "center";
         placeholder.style.marginBottom = "1rem";
         transactionsList.appendChild(placeholder);
+        
+        const balanceTotal = 0;
+        balanceDisplay.textContent = `Balance: $0.00`;
+        clearTransactionsButton.style.display = "none";
         return;
     }
 
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    const pageTransactions = filteredTransactions.slice(startIndex, endIndex);
+    
     let total = 0;
 
-    userTransactions.forEach(t => {
+    pageTransactions.forEach(t => {
         const li = document.createElement("li");
         li.classList.add("transaction-item");
         li.setAttribute("data-id", t.id);
         li.setAttribute("data-type", t.type);
 
-        // Checkbox on the left
         const checkbox = document.createElement("input");
         checkbox.type = "checkbox";
         checkbox.classList.add("transaction-checkbox");
@@ -161,7 +354,6 @@ function renderTransactions() {
         checkbox.style.transform = "scale(1.1)";
         checkbox.style.cursor = "pointer";
 
-        // Left side: description, category, date
         const leftDiv = document.createElement("div");
         
         const descSpan = document.createElement("span");
@@ -184,14 +376,12 @@ function renderTransactions() {
         leftDiv.appendChild(typeSpan);
         leftDiv.appendChild(dateSpan);
 
-        // Center: amount
         const amountSpan = document.createElement("span");
         const amt = parseFloat(t.amount).toFixed(2);
         amountSpan.textContent = t.type === "expense" ? `-$${amt}` : `+$${amt}`;
         amountSpan.classList.add("expense-amount");
         amountSpan.style.color = t.type === "expense" ? "#d32f2f" : "#357a38";
 
-        // Right side: buttons
         const buttonDiv = document.createElement("div");
         buttonDiv.classList.add("button-group");
         
@@ -214,7 +404,6 @@ function renderTransactions() {
         buttonDiv.appendChild(editBtn);
         buttonDiv.appendChild(delBtn);
 
-        // Assemble the row
         li.appendChild(checkbox);
         li.appendChild(leftDiv);
         li.appendChild(amountSpan);
@@ -238,7 +427,7 @@ function renderTransactions() {
     }
 
     balanceDisplay.textContent = `Balance: ${formattedBalance}`;
-    clearTransactionsButton.style.display = userTransactions.length ? "block" : "none";
+    clearTransactionsButton.style.display = filteredTransactions.length ? "block" : "none";
 }
 
 // ------------------------
@@ -307,12 +496,34 @@ addTransactionForm.addEventListener("submit", async (e) => {
 // Delete transaction
 // ------------------------
 async function deleteTransaction(type, id) {
-    const res = await authFetch(`/api/transactions/${type}/${id}`, {
-        method: "DELETE"
-    });
-    if (!res) return;
-
-    fetchTransactions();
+    try {
+        const token = localStorage.getItem('token');
+        
+        let url;
+        if (type === 'expense') {
+            url = `http://localhost:5000/api/transactions/expense/${id}`;
+        } else {
+            url = `http://localhost:5000/api/transactions/income/${id}`;
+        }
+        
+        const response = await fetch(url, {
+            method: 'DELETE',
+            headers: {
+                'Authorization': 'Bearer ' + token,
+                'Content-Type': 'application/json'
+            }
+        });
+        
+        if (response.ok) {
+            await fetchTransactions();
+        } else {
+            const error = await response.json();
+            alert('Failed to delete: ' + (error.error || 'Unknown error'));
+        }
+    } catch (err) {
+        console.error('Delete error:', err);
+        alert('Failed to delete transaction');
+    }
 }
 
 // ------------------------
@@ -549,10 +760,26 @@ closeAiModal.addEventListener("click", () => {
 });
 
 // ------------------------
+// Pagination event listeners
+// ------------------------
+const prevBtn = document.getElementById('prev-page-btn');
+const nextBtn = document.getElementById('next-page-btn');
+
+if (prevBtn) {
+    prevBtn.addEventListener('click', goToPrevPage);
+}
+
+if (nextBtn) {
+    nextBtn.addEventListener('click', goToNextPage);
+}
+
+// ------------------------
 // Init
 // ------------------------
 fetchDropdowns();
+fetchReceipts();
 fetchTransactions();
+setupFilters();
 
 // ========== EDIT EXPENSE & INCOME FEATURE ==========
 
@@ -646,20 +873,15 @@ if (editRepeating) {
 }
 
 async function openEditModal(transaction) {
-    console.log("Opening edit modal for:", transaction);
-    
     document.getElementById('edit-id').value = transaction.id;
     document.getElementById('edit-type').value = transaction.type;
     document.getElementById('edit-amount').value = transaction.amount;
     
-    // Fix the date format for the date input
     let formattedDate = "";
     if (transaction.date) {
-        // Check if date is already in YYYY-MM-DD format
         if (typeof transaction.date === 'string' && transaction.date.match(/^\d{4}-\d{2}-\d{2}$/)) {
             formattedDate = transaction.date;
         } else {
-            // Convert to Date object and format
             const dateObj = new Date(transaction.date);
             if (!isNaN(dateObj.getTime())) {
                 formattedDate = dateObj.toISOString().split('T')[0];
@@ -667,7 +889,6 @@ async function openEditModal(transaction) {
         }
     }
     document.getElementById('edit-date').value = formattedDate;
-    console.log("Date set to:", formattedDate);
     
     if (transaction.type === 'expense') {
         document.getElementById('edit-modal-title').textContent = 'Edit Expense';
