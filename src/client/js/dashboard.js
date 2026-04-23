@@ -344,22 +344,11 @@ function renderTransactions() {
     pageTransactions.forEach(t => {
         const li = document.createElement("li");
         li.classList.add("transaction-item");
-        li.setAttribute("data-id", t.id);
-        li.setAttribute("data-type", t.type);
-
-        const checkbox = document.createElement("input");
-        checkbox.type = "checkbox";
-        checkbox.classList.add("transaction-checkbox");
-        checkbox.style.marginRight = "10px";
-        checkbox.style.transform = "scale(1.1)";
-        checkbox.style.cursor = "pointer";
-
-        const leftDiv = document.createElement("div");
         
         const descSpan = document.createElement("span");
         descSpan.classList.add("transaction-desc");
         descSpan.textContent = t.type === "expense" ? t.description || "(No description)" : t.source;
-        
+
         const typeSpan = document.createElement("span");
         typeSpan.classList.add("transaction-category");
         typeSpan.textContent = t.type === "expense"
@@ -367,11 +356,12 @@ function renderTransactions() {
             : t.repeating
                 ? `Recurring (${t.frequency})`
                 : "One-time";
-        
+
         const dateSpan = document.createElement("span");
         dateSpan.classList.add("transaction-date");
         dateSpan.textContent = new Date(t.date).toLocaleDateString();
-        
+
+        const leftDiv = document.createElement("div");
         leftDiv.appendChild(descSpan);
         leftDiv.appendChild(typeSpan);
         leftDiv.appendChild(dateSpan);
@@ -379,7 +369,6 @@ function renderTransactions() {
         const amountSpan = document.createElement("span");
         const amt = parseFloat(t.amount).toFixed(2);
         amountSpan.textContent = t.type === "expense" ? `-$${amt}` : `+$${amt}`;
-        amountSpan.classList.add("expense-amount");
         amountSpan.style.color = t.type === "expense" ? "#d32f2f" : "#357a38";
 
         const buttonDiv = document.createElement("div");
@@ -400,14 +389,11 @@ function renderTransactions() {
                 deleteTransaction(t.type, t.id);
             }
         };
-        
-        buttonDiv.appendChild(editBtn);
-        buttonDiv.appendChild(delBtn);
 
-        li.appendChild(checkbox);
         li.appendChild(leftDiv);
         li.appendChild(amountSpan);
-        li.appendChild(buttonDiv);
+        li.appendChild(editBtn);
+        li.appendChild(delBtn);
 
         transactionsList.appendChild(li);
 
