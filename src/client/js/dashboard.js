@@ -832,11 +832,13 @@ const editModalHTML = `
             
             <label>Amount ($):</label>
             <input type="number" id="edit-amount" step="0.01" required style="width: 100%; padding: 10px; margin: 10px 0;">
+        
+           <div style="display: flex; align-items: center; gap: 10px; margin: 10px 0;">
+    <label for="edit-date" style="margin: 0;">Date:</label>
+    <input type="date" id="edit-date" required style="flex: 1; padding: 10px; border-radius: 5px; border: 1px solid #ccc;">
+</div>
             
-            <label>Date:</label>
-            <input type="date" id="edit-date" required style="width: 100%; padding: 10px; margin: 10px 0;">
-            
-            <button type="submit" style="background-color: #4CAF50; color: white; padding: 10px; border: none; border-radius: 5px; cursor: pointer; width: 100%;">Update Transaction</button>
+            <button type="submit" style="background-color: #4CAF50; color: white; padding: 10px; border: none; border-radius: 5px; cursor: pointer; width: 100%; margin-top: 10px;">Update Transaction</button>
         </form>
     </div>
 </div>
