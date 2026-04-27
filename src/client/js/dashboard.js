@@ -329,7 +329,6 @@ function renderTransactions() {
         placeholder.style.marginBottom = "1rem";
         transactionsList.appendChild(placeholder);
         
-        const balanceTotal = 0;
         balanceDisplay.textContent = `Balance: $0.00`;
         clearTransactionsButton.style.display = "none";
         return;
@@ -339,7 +338,11 @@ function renderTransactions() {
     const endIndex = startIndex + itemsPerPage;
     const pageTransactions = filteredTransactions.slice(startIndex, endIndex);
     
-    let total = 0;
+    // Calculate total from ALL filtered transactions (not just current page)
+    let totalBalance = 0;
+    filteredTransactions.forEach(t => {
+        totalBalance += t.type === "income" ? parseFloat(t.amount) : -parseFloat(t.amount);
+    });
 
     pageTransactions.forEach(t => {
         const li = document.createElement("li");
@@ -396,16 +399,15 @@ function renderTransactions() {
         li.appendChild(delBtn);
 
         transactionsList.appendChild(li);
-
-        total += t.type === "income" ? parseFloat(t.amount) : -parseFloat(t.amount);
     });
 
+    // Update balance display using TOTAL balance from ALL transactions
     let formattedBalance;
-    if (total < 0) {
-        formattedBalance = `-$${Math.abs(total).toFixed(2)}`;
+    if (totalBalance < 0) {
+        formattedBalance = `-$${Math.abs(totalBalance).toFixed(2)}`;
         balanceDisplay.style.color = "#d32f2f";
-    } else if (total > 0) {
-        formattedBalance = `$${total.toFixed(2)}`;
+    } else if (totalBalance > 0) {
+        formattedBalance = `$${totalBalance.toFixed(2)}`;
         balanceDisplay.style.color = "#357a38";
     } else {
         formattedBalance = `$0.00`;
