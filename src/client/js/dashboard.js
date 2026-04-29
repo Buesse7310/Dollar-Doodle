@@ -8,6 +8,7 @@ let allTransactions = [];
 let currentVendorFilter = "all";
 let currentDateFilter = "all";
 let receiptsData = [];
+let currentCategoryFilter = "all";
 
 // ------------------------
 // Auth Fetch Helper
@@ -140,26 +141,6 @@ async function fetchReceipts() {
     }
 }
 
-// ------------------------
-// Populate vendor dropdown from receipt vendor_name (unique)
-// ------------------------
-function populateVendorFilter(vendors) {
-    const vendorSelect = document.getElementById('vendor-filter');
-    if (!vendorSelect) return;
-    
-    if (!vendors || vendors.length === 0) {
-        vendorSelect.innerHTML = '<option value="all">All Vendors</option>';
-        return;
-    }
-    
-    vendorSelect.innerHTML = '<option value="all">All Vendors</option>';
-    vendors.forEach(vendor => {
-        const option = document.createElement('option');
-        option.value = vendor.vendor_name;
-        option.textContent = vendor.vendor_name;
-        vendorSelect.appendChild(option);
-    });
-}
 
 // ------------------------
 // Fetch transactions
@@ -187,12 +168,33 @@ async function fetchTransactions() {
 // ------------------------
 // Filter functions
 // ------------------------
-function filterByVendor(transaction) {
-    if (currentVendorFilter === 'all') return true;
+async function fetchCategories() {
+    try {
+        const res = await authFetch("/api/db-lookup");
+        if (!res) return;
+        
+        const data = await res.json();
+        const categorySelect = document.getElementById('category-filter');
+        
+        if (categorySelect) {
+            categorySelect.innerHTML = '<option value="all">All Categories</option>';
+            data.categories.forEach(cat => {
+                const option = document.createElement('option');
+                option.value = cat.Category_Name;
+                option.textContent = cat.Category_Name;
+                categorySelect.appendChild(option);
+            });
+        }
+    } catch (err) {
+        console.error("Fetch categories error:", err);
+    }
+}
+
+function filterByCategory(transaction) {
+    if (currentCategoryFilter === 'all') return true;
     
-    // For expenses, check if the description matches the selected vendor
     if (transaction.type === 'expense') {
-        return transaction.description === currentVendorFilter;
+        return transaction.category === currentCategoryFilter;
     }
     return false;
 }
@@ -227,8 +229,8 @@ function filterByDate(transaction, filterType) {
 function applyFilters() {
     let filtered = [...allTransactions];
     
-    if (currentVendorFilter !== 'all') {
-        filtered = filtered.filter(t => filterByVendor(t));
+    if (currentCategoryFilter !== 'all') {
+        filtered = filtered.filter(t => filterByCategory(t));
     }
     
     if (currentDateFilter !== 'all') {
@@ -240,15 +242,14 @@ function applyFilters() {
     renderTransactions();
     updatePaginationControls();
 }
-
 function setupFilters() {
-    const vendorFilter = document.getElementById('vendor-filter');
+    const categoryFilter = document.getElementById('category-filter');
     const dateFilter = document.getElementById('date-filter');
     const clearFiltersBtn = document.getElementById('clear-filters-btn');
     
-    if (vendorFilter) {
-        vendorFilter.addEventListener('change', (e) => {
-            currentVendorFilter = e.target.value;
+    if (categoryFilter) {
+        categoryFilter.addEventListener('change', (e) => {
+            currentCategoryFilter = e.target.value;
             applyFilters();
         });
     }
@@ -262,9 +263,9 @@ function setupFilters() {
     
     if (clearFiltersBtn) {
         clearFiltersBtn.addEventListener('click', () => {
-            currentVendorFilter = 'all';
+            currentCategoryFilter = 'all';
             currentDateFilter = 'all';
-            if (vendorFilter) vendorFilter.value = 'all';
+            if (categoryFilter) categoryFilter.value = 'all';
             if (dateFilter) dateFilter.value = 'all';
             applyFilters();
         });
@@ -322,14 +323,35 @@ function goToNextPage() {
 function renderTransactions() {
     transactionsList.innerHTML = "";
 
+    // Calculate TOTAL balance from ALL transactions (not filtered)
+    let totalBalance = 0;
+    allTransactions.forEach(t => {
+        totalBalance += t.type === "income" ? parseFloat(t.amount) : -parseFloat(t.amount);
+    });
+
+    // Display total balance even when filtered results are empty
+    let formattedBalance;
+    if (totalBalance < 0) {
+        formattedBalance = `-$${Math.abs(totalBalance).toFixed(2)}`;
+        balanceDisplay.style.color = "#d32f2f";
+    } else if (totalBalance > 0) {
+        formattedBalance = `$${totalBalance.toFixed(2)}`;
+        balanceDisplay.style.color = "#357a38";
+    } else {
+        formattedBalance = `$0.00`;
+        balanceDisplay.style.color = "#333";
+    }
+    balanceDisplay.textContent = `Balance: ${formattedBalance}`;
+
+    // Show no results message if filtered transactions are empty
     if (filteredTransactions.length === 0) {
         const placeholder = document.createElement("p");
-        placeholder.textContent = "No transactions yet. Click 'Add Transaction' to get started.";
+        placeholder.textContent = "No transactions match your filters.";
         placeholder.style.textAlign = "center";
         placeholder.style.marginBottom = "1rem";
+        placeholder.style.color = "#888";
         transactionsList.appendChild(placeholder);
         
-        balanceDisplay.textContent = `Balance: $0.00`;
         clearTransactionsButton.style.display = "none";
         return;
     }
@@ -337,12 +359,6 @@ function renderTransactions() {
     const startIndex = (currentPage - 1) * itemsPerPage;
     const endIndex = startIndex + itemsPerPage;
     const pageTransactions = filteredTransactions.slice(startIndex, endIndex);
-    
-    // Calculate total from ALL filtered transactions (not just current page)
-    let totalBalance = 0;
-    filteredTransactions.forEach(t => {
-        totalBalance += t.type === "income" ? parseFloat(t.amount) : -parseFloat(t.amount);
-    });
 
     pageTransactions.forEach(t => {
         const li = document.createElement("li");
@@ -372,6 +388,7 @@ function renderTransactions() {
         const amountSpan = document.createElement("span");
         const amt = parseFloat(t.amount).toFixed(2);
         amountSpan.textContent = t.type === "expense" ? `-$${amt}` : `+$${amt}`;
+        amountSpan.classList.add("expense-amount");
         amountSpan.style.color = t.type === "expense" ? "#d32f2f" : "#357a38";
 
         const buttonDiv = document.createElement("div");
@@ -401,23 +418,8 @@ function renderTransactions() {
         transactionsList.appendChild(li);
     });
 
-    // Update balance display using TOTAL balance from ALL transactions
-    let formattedBalance;
-    if (totalBalance < 0) {
-        formattedBalance = `-$${Math.abs(totalBalance).toFixed(2)}`;
-        balanceDisplay.style.color = "#d32f2f";
-    } else if (totalBalance > 0) {
-        formattedBalance = `$${totalBalance.toFixed(2)}`;
-        balanceDisplay.style.color = "#357a38";
-    } else {
-        formattedBalance = `$0.00`;
-        balanceDisplay.style.color = "#333";
-    }
-
-    balanceDisplay.textContent = `Balance: ${formattedBalance}`;
     clearTransactionsButton.style.display = filteredTransactions.length ? "block" : "none";
 }
-
 // ------------------------
 // Type toggle
 // ------------------------
@@ -765,7 +767,7 @@ if (nextBtn) {
 // Init
 // ------------------------
 fetchDropdowns();
-fetchReceipts();
+fetchCategories();
 fetchTransactions();
 setupFilters();
 
