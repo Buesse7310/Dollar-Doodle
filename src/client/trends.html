@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dollar Doodle - Trends</title>
+
+  <!-- Main Styles -->
+  <link rel="stylesheet" href="css/dashboard.css">
+
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+
+  <!-- Header -->
+  <header class="dashboard-header">
+    <div class="logo-wrapper">
+      <a href="dashboard.html">
+        <img src="assets/images/logo-full.png" class="logo" alt="Dollar Doodle Logo">
+      </a>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <div class="dashboard-container">
+
+    <h1 style="text-align:center;">📊 Spending Trends</h1>
+
+    <!-- Back Button -->
+    <button onclick="window.location.href='dashboard.html'" style="
+      display:block;
+      margin:1rem auto;
+      background-color:#1B3A6C;
+      color:white;
+    ">
+      ← Back
+    </button>
+
+    <!-- FILTER BUTTONS -->
+    <div style="text-align:center; margin: 1rem 0;">
+      <button class="filter-btn" data-range="week">Week</button>
+      <button class="filter-btn active" data-range="month">Month</button>
+      <button class="filter-btn" data-range="year">Year</button>
+    </div>
+
+    <!-- LINE CHART -->
+    <div style="max-width:800px; margin:2rem auto;">
+      <canvas id="lineChart"></canvas>
+    </div>
+
+    <!-- PIE CHART -->
+    <div style="max-width:500px; margin:2rem auto;">
+      <canvas id="pieChart"></canvas>
+    </div>
+
+    <!-- CATEGORY BAR CHART -->
+    <div style="max-width:700px; margin:2rem auto;">
+      <canvas id="categoryBarChart"></canvas>
+    </div>
+
+    <!-- INCOME VS EXPENSE CHART -->
+    <div style="max-width:600px; margin:2rem auto;">
+      <canvas id="incomeExpenseChart"></canvas>
+    </div>
+
+  </div>
+
+  <!-- Trends Script -->
+  <script src="js/trends.js"></script>
+
+</body>
+</html>

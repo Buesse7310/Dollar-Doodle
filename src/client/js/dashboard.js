@@ -75,6 +75,16 @@ const incomeFrequencySelect = document.getElementById("income-frequency");
 
 const logoutBtn = document.getElementById("logout-btn");
 
+
+//Trends Button
+const trendsBtn = document.getElementById("trendsBtn");
+
+if (trendsBtn) {
+  trendsBtn.addEventListener("click", () => {
+    window.location.href = "/trends.html";
+  });
+}
+
 // ------------------------
 // Fetch dropdown data
 // ------------------------
