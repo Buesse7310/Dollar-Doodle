@@ -68,3 +68,113 @@ body {
   color: red;
   font-size: 14px;
 }
+
+
+/* =========================
+   Modal
+   ========================= */
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.modal.hidden {
+  display: none;
+}
+
+.modal-content {
+  background: white;
+  padding: 2rem;
+  border-radius: 12px;
+  max-width: 400px;
+  width: 90%;
+}
+
+/* =========================
+   Confirm Modal Enhancements
+   ========================= */
+
+/* Smooth fade/slide animation */
+.modal-content {
+  animation: modalFadeIn 0.2s ease-in-out;
+  text-align: center;
+}
+
+/* Confirm message */
+#confirmMessage {
+  font-size: 1.1rem;
+  margin-bottom: 1.5rem;
+  color: #333;
+}
+
+/* Button container (if you add wrapper) */
+.modal-actions {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+/* Confirm buttons */
+#confirmYes,
+#confirmNo {
+  padding: 0.5rem 1.2rem;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  box-shadow: none;
+  /* overrides global button shadow */
+}
+
+/* Yes (destructive) */
+#confirmYes {
+  background-color: #d32f2f;
+  color: white;
+}
+
+#confirmYes:hover {
+  background-color: #b71c1c;
+}
+
+/* Cancel */
+#confirmNo {
+  background-color: #e0e0e0;
+  color: #333;
+}
+
+#confirmNo:hover {
+  background-color: #c7c7c7;
+}
+
+/* Animation keyframes */
+@keyframes modalFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Alert mode OK button (green) */
+#confirmModal.alert-mode #confirmYes {
+  background-color: #4CAF50;
+  color: white;
+}
+
+#confirmModal.alert-mode #confirmYes:hover {
+  background-color: #357a38;
+}
+
+/* Hide cancel button in alert mode */
+#confirmModal.alert-mode #confirmNo {
+  display: none;
+}

@@ -76,13 +76,66 @@ const incomeFrequencySelect = document.getElementById("income-frequency");
 const logoutBtn = document.getElementById("logout-btn");
 
 
-//Trends Button
+// Trends Button
 const trendsBtn = document.getElementById("trendsBtn");
 
 if (trendsBtn) {
-  trendsBtn.addEventListener("click", () => {
-    window.location.href = "/trends.html";
+    trendsBtn.addEventListener("click", () => {
+        window.location.href = "/trends.html";
+    });
+}
+
+// in-app alert
+function showAlert(message) {
+  return new Promise((resolve) => {
+    const modal = document.getElementById("confirmModal");
+    const msg = document.getElementById("confirmMessage");
+    const yes = document.getElementById("confirmYes");
+    const no = document.getElementById("confirmNo");
+
+    msg.textContent = message;
+
+    modal.classList.add("alert-mode");
+
+    yes.textContent = "OK";
+    no.style.display = "none";
+
+    modal.classList.remove("hidden");
+
+    yes.onclick = () => {
+      modal.classList.add("hidden");
+
+      // reset button
+      modal.classList.remove("alert-mode");
+      no.style.display = "inline-block";
+      yes.textContent = "Yes";
+
+      resolve();
+    };
   });
+}
+
+// in-app confirmation
+function showConfirm(message) {
+    return new Promise((resolve) => {
+        const modal = document.getElementById("confirmModal");
+        const msg = document.getElementById("confirmMessage");
+        const yes = document.getElementById("confirmYes");
+        const no = document.getElementById("confirmNo");
+
+        msg.textContent = message;
+        modal.classList.remove("hidden");
+
+        yes.onclick = () => {
+            modal.classList.add("hidden");
+            resolve(true);
+        };
+
+        no.onclick = () => {
+            modal.classList.add("hidden");
+            resolve(false);
+        };
+    });
 }
 
 // ------------------------
@@ -137,12 +190,12 @@ async function fetchReceipts() {
                 'Authorization': 'Bearer ' + token
             }
         });
-        
+
         if (!response.ok) {
             console.error('Failed to fetch receipts:', response.status);
             return;
         }
-        
+
         const vendors = await response.json();
         console.log('Vendors loaded from receipts:', vendors);
         populateVendorFilter(vendors);
@@ -161,7 +214,7 @@ async function fetchTransactions() {
         if (!res) return;
 
         const data = await res.json();
-        
+
         if (Array.isArray(data)) {
             allTransactions = data;
         } else {
@@ -169,7 +222,7 @@ async function fetchTransactions() {
             const incomes = data.incomes || [];
             allTransactions = [...expenses, ...incomes];
         }
-        
+
         applyFilters();
     } catch (err) {
         console.error("Fetch transactions error:", err);
@@ -182,10 +235,10 @@ async function fetchCategories() {
     try {
         const res = await authFetch("/api/db-lookup");
         if (!res) return;
-        
+
         const data = await res.json();
         const categorySelect = document.getElementById('category-filter');
-        
+
         if (categorySelect) {
             categorySelect.innerHTML = '<option value="all">All Categories</option>';
             data.categories.forEach(cat => {
@@ -202,7 +255,7 @@ async function fetchCategories() {
 
 function filterByCategory(transaction) {
     if (currentCategoryFilter === 'all') return true;
-    
+
     if (transaction.type === 'expense') {
         return transaction.category === currentCategoryFilter;
     }
@@ -211,18 +264,18 @@ function filterByCategory(transaction) {
 
 function filterByDate(transaction, filterType) {
     let transactionDate = new Date(transaction.date);
-    
+
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    
+
     const startOfWeek = new Date(today);
     startOfWeek.setDate(today.getDate() - today.getDay());
-    
+
     const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
-    
+
     const startOfYear = new Date(today.getFullYear(), 0, 1);
-    
-    switch(filterType) {
+
+    switch (filterType) {
         case 'today':
             return transactionDate.toDateString() === today.toDateString();
         case 'week':
@@ -238,15 +291,15 @@ function filterByDate(transaction, filterType) {
 
 function applyFilters() {
     let filtered = [...allTransactions];
-    
+
     if (currentCategoryFilter !== 'all') {
         filtered = filtered.filter(t => filterByCategory(t));
     }
-    
+
     if (currentDateFilter !== 'all') {
         filtered = filtered.filter(t => filterByDate(t, currentDateFilter));
     }
-    
+
     filteredTransactions = filtered;
     currentPage = 1;
     renderTransactions();
@@ -256,21 +309,21 @@ function setupFilters() {
     const categoryFilter = document.getElementById('category-filter');
     const dateFilter = document.getElementById('date-filter');
     const clearFiltersBtn = document.getElementById('clear-filters-btn');
-    
+
     if (categoryFilter) {
         categoryFilter.addEventListener('change', (e) => {
             currentCategoryFilter = e.target.value;
             applyFilters();
         });
     }
-    
+
     if (dateFilter) {
         dateFilter.addEventListener('change', (e) => {
             currentDateFilter = e.target.value;
             applyFilters();
         });
     }
-    
+
     if (clearFiltersBtn) {
         clearFiltersBtn.addEventListener('click', () => {
             currentCategoryFilter = 'all';
@@ -290,17 +343,17 @@ function updatePaginationControls() {
     const pageInfo = document.getElementById('page-info');
     const prevBtn = document.getElementById('prev-page-btn');
     const nextBtn = document.getElementById('next-page-btn');
-    
+
     if (pageInfo) {
         pageInfo.textContent = `Page ${currentPage} of ${totalPages || 1}`;
     }
-    
+
     if (prevBtn) {
         prevBtn.disabled = currentPage === 1;
         prevBtn.style.opacity = currentPage === 1 ? '0.5' : '1';
         prevBtn.style.cursor = currentPage === 1 ? 'not-allowed' : 'pointer';
     }
-    
+
     if (nextBtn) {
         nextBtn.disabled = currentPage === totalPages || totalPages === 0;
         nextBtn.style.opacity = (currentPage === totalPages || totalPages === 0) ? '0.5' : '1';
@@ -361,7 +414,7 @@ function renderTransactions() {
         placeholder.style.marginBottom = "1rem";
         placeholder.style.color = "#888";
         transactionsList.appendChild(placeholder);
-        
+
         clearTransactionsButton.style.display = "none";
         return;
     }
@@ -373,7 +426,7 @@ function renderTransactions() {
     pageTransactions.forEach(t => {
         const li = document.createElement("li");
         li.classList.add("transaction-item");
-        
+
         const descSpan = document.createElement("span");
         descSpan.classList.add("transaction-desc");
         descSpan.textContent = t.type === "expense" ? t.description || "(No description)" : t.source;
@@ -403,21 +456,21 @@ function renderTransactions() {
 
         const buttonDiv = document.createElement("div");
         buttonDiv.classList.add("button-group");
-        
+
         const editBtn = document.createElement("button");
         editBtn.textContent = "Edit";
         editBtn.classList.add("edit-btn");
         editBtn.onclick = () => {
             openEditModal(t);
         };
-        
+
         const delBtn = document.createElement("button");
         delBtn.textContent = "Delete";
         delBtn.classList.add("delete-btn");
-        delBtn.onclick = () => {
-            if (confirm("Are you sure you want to delete this transaction?")) {
-                deleteTransaction(t.type, t.id);
-            }
+        delBtn.onclick = async () => {
+            const confirmed = await showConfirm("Are you sure you want to delete this transaction?");
+            if (!confirmed) return;
+            deleteTransaction(t.type, t.id);
         };
 
         li.appendChild(leftDiv);
@@ -498,14 +551,14 @@ addTransactionForm.addEventListener("submit", async (e) => {
 async function deleteTransaction(type, id) {
     try {
         const token = localStorage.getItem('token');
-        
+
         let url;
         if (type === 'expense') {
             url = `http://localhost:5000/api/transactions/expense/${id}`;
         } else {
             url = `http://localhost:5000/api/transactions/income/${id}`;
         }
-        
+
         const response = await fetch(url, {
             method: 'DELETE',
             headers: {
@@ -513,16 +566,16 @@ async function deleteTransaction(type, id) {
                 'Content-Type': 'application/json'
             }
         });
-        
+
         if (response.ok) {
             await fetchTransactions();
         } else {
             const error = await response.json();
-            alert('Failed to delete: ' + (error.error || 'Unknown error'));
+            showAlert('Failed to delete: ' + (error.error || 'Unknown error'));
         }
     } catch (err) {
         console.error('Delete error:', err);
-        alert('Failed to delete transaction');
+        showAlert('Failed to delete transaction');
     }
 }
 
@@ -530,7 +583,8 @@ async function deleteTransaction(type, id) {
 // Clear all
 // ------------------------
 clearTransactionsButton.addEventListener("click", async () => {
-    if (!confirm("Clear all transactions?")) return;
+    const confirmed = await showConfirm("Clear all transactions?");
+    if (!confirmed) return;
 
     const res = await authFetch("/api/transactions", {
         method: "DELETE"
@@ -567,8 +621,9 @@ function logout() {
 }
 
 if (logoutBtn) {
-    logoutBtn.addEventListener("click", () => {
-        if (confirm("Are you sure you want to log out?")) logout();
+    logoutBtn.addEventListener("click", async () => {
+        const confirmed = await showConfirm("Are you sure you want to log out?");
+        if (confirmed) logout();
     });
 }
 
@@ -616,12 +671,12 @@ async function processReceipt(file) {
         const result = await response.json();
 
         if (result.success) {
-            alert(`✅ Success! Saved ${result.lineItemsCount} items from your receipt.`);
+            showAlert(`✅ Success! Saved ${result.lineItemsCount} items from your receipt.`);
             await fetchTransactions();
             loadingOverlay.style.display = 'none';
             receiptInput.value = '';
         } else {
-            alert('Failed to process receipt: ' + (result.error || 'Unknown error'));
+            showAlert('Failed to process receipt: ' + (result.error || 'Unknown error'));
             if (loadingOverlay) {
                 loadingOverlay.style.display = 'none';
             }
@@ -629,7 +684,7 @@ async function processReceipt(file) {
 
     } catch (error) {
         console.error('Error:', error);
-        alert('Failed to process receipt: ' + error.message);
+        showAlert('Failed to process receipt: ' + error.message);
         if (loadingOverlay) {
             loadingOverlay.style.display = 'none';
         }
@@ -662,7 +717,7 @@ if (feedbackForm) {
         const message = document.getElementById('feedback-message').value;
 
         if (!message) {
-            alert('Please enter a message');
+            showAlert('Please enter a message');
             return;
         }
 
@@ -681,11 +736,11 @@ if (feedbackForm) {
         });
 
         if (responseFeedback.ok) {
-            alert('Feedback sent!');
+            showAlert('Feedback sent!');
             document.getElementById('feedback-modal').style.display = 'none';
             document.getElementById('feedback-message').value = '';
         } else {
-            alert('Failed to send feedback');
+            showAlert('Failed to send feedback');
         }
     };
 }
@@ -869,7 +924,7 @@ const editRepeating = document.getElementById('edit-repeating');
 const editFrequency = document.getElementById('edit-frequency');
 
 if (editRepeating) {
-    editRepeating.addEventListener('change', function() {
+    editRepeating.addEventListener('change', function () {
         editFrequency.disabled = this.value !== 'true';
     });
 }
@@ -878,7 +933,7 @@ async function openEditModal(transaction) {
     document.getElementById('edit-id').value = transaction.id;
     document.getElementById('edit-type').value = transaction.type;
     document.getElementById('edit-amount').value = transaction.amount;
-    
+
     let formattedDate = "";
     if (transaction.date) {
         if (typeof transaction.date === 'string' && transaction.date.match(/^\d{4}-\d{2}-\d{2}$/)) {
@@ -891,13 +946,13 @@ async function openEditModal(transaction) {
         }
     }
     document.getElementById('edit-date').value = formattedDate;
-    
+
     if (transaction.type === 'expense') {
         document.getElementById('edit-modal-title').textContent = 'Edit Expense';
         document.getElementById('edit-expense-fields').style.display = 'block';
         document.getElementById('edit-income-fields').style.display = 'none';
         document.getElementById('edit-description').value = transaction.description || '';
-        
+
         const res = await authFetch('/api/db-lookup');
         const data = await res.json();
         const categorySelect = document.getElementById('edit-category');
@@ -915,51 +970,51 @@ async function openEditModal(transaction) {
         document.getElementById('edit-modal-title').textContent = 'Edit Income';
         document.getElementById('edit-expense-fields').style.display = 'none';
         document.getElementById('edit-income-fields').style.display = 'block';
-        
+
         const sourceSelect = document.getElementById('edit-source');
         if (sourceSelect) {
             sourceSelect.value = transaction.source || 'Salary';
         }
-        
+
         document.getElementById('edit-repeating').value = transaction.repeating ? 'true' : 'false';
         document.getElementById('edit-frequency').value = transaction.frequency || 'monthly';
-        
+
         if (editFrequency) {
             editFrequency.disabled = !transaction.repeating;
         }
     }
-    
+
     editModal.style.display = 'flex';
 }
 
 if (closeEditModal) {
-    closeEditModal.onclick = function() {
+    closeEditModal.onclick = function () {
         editModal.style.display = 'none';
     }
 }
 
-window.onclick = function(e) {
+window.onclick = function (e) {
     if (e.target === editModal) {
         editModal.style.display = 'none';
     }
 }
 
 if (editForm) {
-    editForm.onsubmit = async function(e) {
+    editForm.onsubmit = async function (e) {
         e.preventDefault();
-        
+
         const id = document.getElementById('edit-id').value;
         const type = document.getElementById('edit-type').value;
         let amount = document.getElementById('edit-amount').value;
         const date = document.getElementById('edit-date').value;
-        
+
         const token = localStorage.getItem('token');
         let response;
-        
+
         if (type === 'expense') {
             const description = document.getElementById('edit-description').value;
             const categoryId = document.getElementById('edit-category').value;
-            
+
             response = await fetch(`http://localhost:5000/api/transactions/expense/${id}`, {
                 method: 'PUT',
                 headers: {
@@ -977,11 +1032,11 @@ if (editForm) {
             const source = document.getElementById('edit-source').value;
             const repeating = document.getElementById('edit-repeating').value === 'true';
             let frequency = document.getElementById('edit-frequency').value;
-            
+
             if (!repeating) {
                 frequency = null;
             }
-            
+
             response = await fetch(`http://localhost:5000/api/transactions/income/${id}`, {
                 method: 'PUT',
                 headers: {
@@ -997,15 +1052,14 @@ if (editForm) {
                 })
             });
         }
-        
+
         const result = await response.json();
-        
+
         if (response.ok) {
-            alert('Transaction updated successfully!');
             editModal.style.display = 'none';
             fetchTransactions();
         } else {
-            alert('Failed to update transaction: ' + (result.error || 'Unknown error'));
+            showAlert('Failed to update transaction: ' + (result.error || 'Unknown error'));
         }
     }
 }

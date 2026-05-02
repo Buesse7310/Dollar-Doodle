@@ -7,6 +7,36 @@ if (token) {
   window.location.href = "dashboard.html"
 }
 
+// in-app alert
+function showAlert(message) {
+  return new Promise((resolve) => {
+    const modal = document.getElementById("confirmModal");
+    const msg = document.getElementById("confirmMessage");
+    const yes = document.getElementById("confirmYes");
+    const no = document.getElementById("confirmNo");
+
+    msg.textContent = message;
+
+    modal.classList.add("alert-mode");
+
+    yes.textContent = "OK";
+    no.style.display = "none";
+
+    modal.classList.remove("hidden");
+
+    yes.onclick = () => {
+      modal.classList.add("hidden");
+
+      // reset button
+      modal.classList.remove("alert-mode");
+      no.style.display = "inline-block";
+      yes.textContent = "Yes";
+
+      resolve();
+    };
+  });
+}
+
 // ------------------------
 // Email/Password Login
 // ------------------------
@@ -87,7 +117,7 @@ async function register() {
       return;
     }
 
-    alert("Registration successful! You can now login.");
+    await showAlert("Registration successful! You can now login.");
     window.location.href = "login.html";
   } catch (err) {
     console.error(err);
@@ -115,12 +145,12 @@ function handleCredentialResponse(response) {
         localStorage.setItem("token", data.token);
         window.location.href = "dashboard.html";
       } else {
-        alert("Google login failed.");
+        showAlert("Google login failed.");
       }
     })
     .catch(err => {
       console.error(err);
-      alert("Server error during Google login.");
+      showAlert("Server error during Google login.");
     });
 }
 

@@ -32,16 +32,19 @@
     <button id="add-expense-btn">Add Transaction</button>
 
     <!-- Receipt Upload -->
-    <button id="upload-receipt-btn" style="display: block; margin: 1rem auto; background-color: #1B3A6C; color: white; border: none; border-radius: 50px; padding: 0.6rem 1.5rem; font-weight: 600; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);">📷 Upload Receipt</button>
+    <button id="upload-receipt-btn"
+      style="display: block; margin: 1rem auto; background-color: #1B3A6C; color: white; border: none; border-radius: 50px; padding: 0.6rem 1.5rem; font-weight: 600; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);">📷
+      Upload Receipt</button>
     <input type="file" id="receiptInput" accept="image/*,application/pdf" style="display: none;">
 
     <!-- Disclaimer -->
     <p style="text-align: center; font-size: 0.75rem; color: #888; margin-top: 5px; margin-bottom: 10px;">
-      ⚠️ Receipt image quality may affect scan accuracy. AI can make mistakes — please review and edit transactions if needed.
+      ⚠️ Receipt image quality may affect scan accuracy. AI can make mistakes — please review and edit transactions if
+      needed.
     </p>
 
     <!-- Trends/Graphs Buttion -->
-   <button id="trendsBtn" style="
+    <button id="trendsBtn" style="
     display: block;
     margin: 1rem auto;
     background-color: #1B3A6C;
@@ -52,9 +55,9 @@
     font-weight: 600;
     cursor: pointer;
     ">
-    📈 View Trends
+      📈 View Trends
     </button>
-    
+
     <!-- Feedback Button -->
     <button id="feedback-btn"
       style="position: fixed; bottom: 20px; left: 20px; background-color: #1B3A6C; color: white; padding: 10px 20px; border: none; border-radius: 50px; cursor: pointer;">
@@ -124,31 +127,40 @@
     </div>
 
     <!-- Transactions Header with Filters -->
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap;">
+    <div
+      style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap;">
       <h3 style="margin-bottom: 0;">Transactions</h3>
       <div style="display: flex; gap: 10px; align-items: center;">
-        <select id="category-filter" style="padding: 5px 10px; border-radius: 5px; border: 1px solid #ccc; font-size: 0.8rem;">
+        <select id="category-filter"
+          style="padding: 5px 10px; border-radius: 5px; border: 1px solid #ccc; font-size: 0.8rem;">
           <option value="all">All Categories</option>
         </select>
-        <select id="date-filter" style="padding: 5px 10px; border-radius: 5px; border: 1px solid #ccc; font-size: 0.8rem;">
+        <select id="date-filter"
+          style="padding: 5px 10px; border-radius: 5px; border: 1px solid #ccc; font-size: 0.8rem;">
           <option value="all">All Dates</option>
           <option value="today">Today</option>
           <option value="week">This Week</option>
           <option value="month">This Month</option>
           <option value="year">This Year</option>
         </select>
-        <button id="clear-filters-btn" style="background-color: #6c757d; color: white; padding: 5px 12px; border-radius: 5px; border: none; cursor: pointer; font-size: 0.8rem;">Clear</button>
+        <button id="clear-filters-btn"
+          style="background-color: #6c757d; color: white; padding: 5px 12px; border-radius: 5px; border: none; cursor: pointer; font-size: 0.8rem;">Clear</button>
       </div>
     </div>
 
     <ul id="transactions"></ul>
 
     <!-- Pagination Controls -->
-<div id="pagination-controls" style="display: flex; justify-content: center; align-items: center; gap: 15px; margin: 20px 0;">
-    <button id="prev-page-btn" style="background-color: #1B3A6C; color: white; padding: 5px 15px; border: none; border-radius: 5px; cursor: pointer;">← Previous</button>
-    <span id="page-info" style="font-size: 0.9rem;">Page 1 of 1</span>
-    <button id="next-page-btn" style="background-color: #1B3A6C; color: white; padding: 5px 15px; border: none; border-radius: 5px; cursor: pointer;">Next →</button>
-</div>
+    <div id="pagination-controls"
+      style="display: flex; justify-content: center; align-items: center; gap: 15px; margin: 20px 0;">
+      <button id="prev-page-btn"
+        style="background-color: #1B3A6C; color: white; padding: 5px 15px; border: none; border-radius: 5px; cursor: pointer;">←
+        Previous</button>
+      <span id="page-info" style="font-size: 0.9rem;">Page 1 of 1</span>
+      <button id="next-page-btn"
+        style="background-color: #1B3A6C; color: white; padding: 5px 15px; border: none; border-radius: 5px; cursor: pointer;">Next
+        →</button>
+    </div>
 
     <button id="clearBtn">Clear All</button>
 
@@ -216,6 +228,16 @@
 
       </div>
 
+    </div>
+  </div>
+
+  <div id="confirmModal" class="modal hidden">
+    <div class="modal-content">
+      <p id="confirmMessage">Are you sure?</p>
+      <div class="modal-actions">
+        <button id="confirmYes">Yes</button>
+        <button id="confirmNo">Cancel</button>
+      </div>
     </div>
   </div>
 
