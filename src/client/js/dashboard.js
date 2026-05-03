@@ -60,7 +60,7 @@ const aiInsightsList = document.getElementById("ai-insights");
 const aiSuggestionsList = document.getElementById("ai-suggestions");
 
 const typeSelect = document.getElementById("type");
-const descriptionInput = document.getElementById("description");
+const descriptionInput = document.getElementById("add-expense-desc");
 const categoryWrapper = document.getElementById("category-wrapper");
 const categorySelect = document.getElementById("category");
 
