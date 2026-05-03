@@ -77,8 +77,8 @@ The server is now running on <http://localhost:5000> and nodemon will automatica
 
 - [x] Phase 1 (Feb 22): Brainstorm + project proposal.
 - [x] Phase 2 (Mar 22): Frontend development.
-- [ ] Phase 3 (Apr 19): Backend development.
-- [ ] Phase 4 (May 11): Test and debug.
+- [x] Phase 3 (Apr 19): Backend development.
+- [x] Phase 4 (May 11): Test and debug.
 
 ## Members
 
