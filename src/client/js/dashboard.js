@@ -60,7 +60,6 @@ const aiInsightsList = document.getElementById("ai-insights");
 const aiSuggestionsList = document.getElementById("ai-suggestions");
 
 const typeSelect = document.getElementById("type");
-const descriptionWrapper = document.getElementById("description-wrapper");
 const descriptionInput = document.getElementById("description");
 const categoryWrapper = document.getElementById("category-wrapper");
 const categorySelect = document.getElementById("category");
@@ -88,32 +87,32 @@ if (trendsBtn) {
 
 // in-app alert
 function showAlert(message) {
-  return new Promise((resolve) => {
-    const modal = document.getElementById("confirmModal");
-    const msg = document.getElementById("confirmMessage");
-    const yes = document.getElementById("confirmYes");
-    const no = document.getElementById("confirmNo");
+    return new Promise((resolve) => {
+        const modal = document.getElementById("confirmModal");
+        const msg = document.getElementById("confirmMessage");
+        const yes = document.getElementById("confirmYes");
+        const no = document.getElementById("confirmNo");
 
-    msg.textContent = message;
+        msg.textContent = message;
 
-    modal.classList.add("alert-mode");
+        modal.classList.add("alert-mode");
 
-    yes.textContent = "OK";
-    no.style.display = "none";
+        yes.textContent = "OK";
+        no.style.display = "none";
 
-    modal.classList.remove("hidden");
+        modal.classList.remove("hidden");
 
-    yes.onclick = () => {
-      modal.classList.add("hidden");
+        yes.onclick = () => {
+            modal.classList.add("hidden");
 
-      // reset button
-      modal.classList.remove("alert-mode");
-      no.style.display = "inline-block";
-      yes.textContent = "Yes";
+            // reset button
+            modal.classList.remove("alert-mode");
+            no.style.display = "inline-block";
+            yes.textContent = "Yes";
 
-      resolve();
-    };
-  });
+            resolve();
+        };
+    });
 }
 
 // in-app confirmation
@@ -489,14 +488,14 @@ function renderTransactions() {
 // ------------------------
 function handleTypeChange() {
     if (typeSelect.value === "income") {
-        descriptionWrapper.style.display = "none";
+        descriptionInput.style.display = "none";
         categoryWrapper.style.display = "none";
         incomeSourceWrapper.style.display = "block";
         incomeRepeatingWrapper.style.display = "flex";
         incomeFrequencyWrapper.style.display = "block";
         incomeFrequencySelect.disabled = !incomeRepeatingCheckbox.checked;
     } else {
-        descriptionWrapper.style.display = "block";
+        descriptionInput.style.display = "block";
         categoryWrapper.style.display = "block";
         incomeSourceWrapper.style.display = "none";
         incomeRepeatingWrapper.style.display = "none";
@@ -1057,6 +1056,7 @@ if (editForm) {
         const result = await response.json();
 
         if (response.ok) {
+            showAlert('Transaction updated successfully!');
             editModal.style.display = 'none';
             fetchTransactions();
         } else {
