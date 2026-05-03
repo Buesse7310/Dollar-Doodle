@@ -60,7 +60,8 @@ const aiInsightsList = document.getElementById("ai-insights");
 const aiSuggestionsList = document.getElementById("ai-suggestions");
 
 const typeSelect = document.getElementById("type");
-const descriptionInput = document.getElementById("add-expense-desc");
+const descriptionWrapper = document.getElementById("description-wrapper");
+const descriptionInput = document.getElementById("description");
 const categoryWrapper = document.getElementById("category-wrapper");
 const categorySelect = document.getElementById("category");
 
@@ -488,14 +489,14 @@ function renderTransactions() {
 // ------------------------
 function handleTypeChange() {
     if (typeSelect.value === "income") {
-        descriptionInput.style.display = "none";
+        descriptionWrapper.style.display = "none";
         categoryWrapper.style.display = "none";
         incomeSourceWrapper.style.display = "block";
         incomeRepeatingWrapper.style.display = "flex";
         incomeFrequencyWrapper.style.display = "block";
         incomeFrequencySelect.disabled = !incomeRepeatingCheckbox.checked;
     } else {
-        descriptionInput.style.display = "block";
+        descriptionWrapper.style.display = "block";
         categoryWrapper.style.display = "block";
         incomeSourceWrapper.style.display = "none";
         incomeRepeatingWrapper.style.display = "none";
