@@ -472,13 +472,6 @@ form select:focus {
   margin-top: 0;
 }
 
-#feedback-form {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  margin-top: 5px;
-}
-
 #feedback-message {
   padding: 6px 8px;
   border: 1px solid #ccc;
@@ -515,16 +508,6 @@ form select:focus {
 
 .filter-btn.active {
   background-color: #4CAF50;
-}
-
-form {
-  flex-direction: column;
-}
-
-form input,
-form select,
-form button {
-  width: 100%;
 }
 
 #logout-btn {
